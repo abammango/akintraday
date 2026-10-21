@@ -1,0 +1,946 @@
+<!doctype html>
+<html lang="ms">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Trading Journal</title>
+<style>
+:root{
+  --bg:#f5f6f8; --surface:#ffffff; --surface-2:#eef1f4; --border:#dfe3e8;
+  --text:#121720; --muted:#5d6876; --accent:#2563eb; --accent-text:#ffffff;
+  --win:#15803d; --win-bg:#dcfce7; --loss:#b91c1c; --loss-bg:#fee2e2;
+  --be:#4b5563; --be-bg:#e5e7eb; --gold:#92600a; --gold-bg:#fdf0c4;
+  --nq:#1d4ed8; --nq-bg:#dbeafe; --other:#6d28d9; --other-bg:#ede9fe;
+  --shadow:0 1px 2px rgba(16,24,40,.05),0 6px 20px rgba(16,24,40,.06);
+  --overlay:rgba(10,14,20,.55); --radius:12px;
+  color-scheme:light;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#0d1117; --surface:#151b23; --surface-2:#1d242e; --border:#2a323d;
+    --text:#e6e9ee; --muted:#8c97a6; --accent:#3b82f6; --accent-text:#ffffff;
+    --win:#4ade80; --win-bg:rgba(34,197,94,.15); --loss:#f87171; --loss-bg:rgba(239,68,68,.15);
+    --be:#a3acb9; --be-bg:rgba(163,172,185,.14); --gold:#fbbf24; --gold-bg:rgba(251,191,36,.14);
+    --nq:#60a5fa; --nq-bg:rgba(96,165,250,.15); --other:#c4b5fd; --other-bg:rgba(167,139,250,.15);
+    --shadow:0 1px 2px rgba(0,0,0,.3); --overlay:rgba(0,0,0,.7);
+    color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#0d1117; --surface:#151b23; --surface-2:#1d242e; --border:#2a323d;
+  --text:#e6e9ee; --muted:#8c97a6; --accent:#3b82f6; --accent-text:#ffffff;
+  --win:#4ade80; --win-bg:rgba(34,197,94,.15); --loss:#f87171; --loss-bg:rgba(239,68,68,.15);
+  --be:#a3acb9; --be-bg:rgba(163,172,185,.14); --gold:#fbbf24; --gold-bg:rgba(251,191,36,.14);
+  --nq:#60a5fa; --nq-bg:rgba(96,165,250,.15); --other:#c4b5fd; --other-bg:rgba(167,139,250,.15);
+  --shadow:0 1px 2px rgba(0,0,0,.3); --overlay:rgba(0,0,0,.7);
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+html,body{margin:0}
+body{background:var(--bg);color:var(--text);font:14px/1.5 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;-webkit-font-smoothing:antialiased}
+button,input,select,textarea{font:inherit;color:inherit}
+.num{font-variant-numeric:tabular-nums}
+.wrap{max-width:1180px;margin:0 auto;padding:20px 16px 64px}
+
+/* header */
+header.top{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:20px}
+header.top h1{font-size:20px;margin:0;letter-spacing:-.01em}
+header.top h1 small{display:block;font-size:12px;font-weight:500;color:var(--muted);letter-spacing:0}
+.rename{border:none;background:none;color:var(--muted);cursor:pointer;font-size:15px;padding:2px 6px;margin-left:4px;border-radius:6px;vertical-align:2px}
+.rename:hover{background:var(--surface-2);color:var(--accent)}
+.sechead{display:flex;align-items:baseline;gap:10px;margin:0 0 8px}
+.sechead h2{font-size:14px;margin:0}
+.sechead span{font-size:12px;color:var(--muted)}
+.wl{display:flex;height:6px;border-radius:3px;overflow:hidden;background:var(--surface-2);margin-top:6px;min-width:60px}
+.wl i{display:block;height:100%}
+.wl .w{background:var(--win)}.wl .l{background:var(--loss)}.wl .b{background:var(--be);opacity:.5}
+.setups{margin-bottom:16px}
+.breakdown td.bar{width:28%;padding-left:16px}
+.breakdown td.setup-name{max-width:220px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.spacer{flex:1}
+.btn{display:inline-flex;align-items:center;gap:6px;border:1px solid var(--border);background:var(--surface);padding:8px 14px;border-radius:9px;cursor:pointer;font-weight:500;white-space:nowrap}
+.btn:hover{background:var(--surface-2)}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:var(--accent-text)}
+.btn.primary:hover{filter:brightness(1.08)}
+.btn.danger{color:var(--loss)}
+.btn.ghost{border-color:transparent;background:transparent}
+.btn.sm{padding:5px 10px;font-size:13px}
+.btn:focus-visible,.seg input:focus-visible+span,.zone:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+
+/* cards */
+.card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);box-shadow:var(--shadow)}
+.stats{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:12px;margin-bottom:12px}
+.stat{padding:14px 16px}
+.stat .lbl{font-size:12px;color:var(--muted);font-weight:500}
+.stat .val{font-size:22px;font-weight:650;margin-top:2px;letter-spacing:-.01em}
+.stat .sub{font-size:12px;color:var(--muted)}
+.pos{color:var(--win)} .neg{color:var(--loss)}
+.row2{display:grid;grid-template-columns:2fr 1fr;gap:12px;margin-bottom:16px}
+.panel{padding:14px 16px}
+.panel h2{font-size:13px;margin:0 0 10px;color:var(--muted);font-weight:600}
+.chart{position:relative;height:170px}
+.chart svg{width:100%;height:100%;display:block}
+.chart .empty{position:absolute;inset:0;display:grid;place-items:center;color:var(--muted);font-size:13px}
+.chart .lab{position:absolute;font-size:11px;color:var(--muted);background:var(--surface);padding:0 4px;border-radius:4px}
+.breakdown{width:100%;border-collapse:collapse;font-size:13px}
+.breakdown th{text-align:left;font-weight:500;color:var(--muted);font-size:12px;padding:4px 0}
+.breakdown td{padding:7px 0;border-top:1px solid var(--border)}
+.breakdown td:not(:first-child),.breakdown th:not(:first-child){text-align:right}
+
+/* filters */
+.filters{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-bottom:12px}
+.filters select,.filters input{background:var(--surface);border:1px solid var(--border);border-radius:9px;padding:7px 10px;min-width:0}
+.filters input[type=search]{flex:1 1 200px}
+.filters .count{color:var(--muted);font-size:13px;margin-left:auto}
+
+/* trade list */
+.list{display:flex;flex-direction:column;gap:8px}
+.trade{display:grid;grid-template-columns:64px 110px 150px 1fr 90px 110px;align-items:center;gap:14px;padding:10px 14px 10px 10px;cursor:pointer;text-align:left;width:100%;border:1px solid var(--border)}
+.trade:hover{border-color:var(--accent)}
+.thumb{width:64px;height:44px;border-radius:7px;background:var(--surface-2);object-fit:cover;display:grid;place-items:center;color:var(--muted);font-size:11px;overflow:hidden}
+.thumb img{width:100%;height:100%;object-fit:cover;display:block}
+.trade .date b{display:block;font-weight:600}
+.trade .date span,.trade .meta span{color:var(--muted);font-size:12px}
+.trade .meta{min-width:0}
+.trade .meta div{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.trade .pnl{font-weight:650;font-size:15px;text-align:right}
+.badges{display:flex;gap:6px;flex-wrap:wrap}
+.badge{display:inline-block;font-size:12px;font-weight:600;padding:2px 8px;border-radius:999px;background:var(--surface-2);color:var(--muted);line-height:18px}
+.b-MGC{background:var(--gold-bg);color:var(--gold)}
+.b-MNQ{background:var(--nq-bg);color:var(--nq)}
+.b-OTHER{background:var(--other-bg);color:var(--other)}
+.b-BUY,.b-WIN{background:var(--win-bg);color:var(--win)}
+.b-SELL,.b-LOSS{background:var(--loss-bg);color:var(--loss)}
+.b-BE{background:var(--be-bg);color:var(--be)}
+.emptystate{padding:48px 16px;text-align:center;color:var(--muted)}
+.emptystate b{display:block;color:var(--text);font-size:16px;margin-bottom:4px}
+
+/* dialogs */
+dialog{border:none;padding:0;background:transparent;color:var(--text);max-width:min(960px,calc(100vw - 24px));width:100%;max-height:calc(100dvh - 24px)}
+dialog::backdrop{background:var(--overlay)}
+.dlg{background:var(--surface);border:1px solid var(--border);border-radius:16px;display:flex;flex-direction:column;max-height:calc(100dvh - 24px)}
+.dlg-h{display:flex;align-items:center;gap:10px;padding:14px 18px;border-bottom:1px solid var(--border)}
+.dlg-h h3{margin:0;font-size:16px}
+.dlg-b{padding:18px;overflow:auto}
+.dlg-f{display:flex;gap:8px;justify-content:flex-end;padding:12px 18px;border-top:1px solid var(--border);flex-wrap:wrap}
+.x{border:none;background:transparent;font-size:22px;line-height:1;cursor:pointer;color:var(--muted);padding:4px 8px;border-radius:8px}
+.x:hover{background:var(--surface-2);color:var(--text)}
+
+/* form */
+.grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px 14px}
+.f{display:flex;flex-direction:column;gap:5px;min-width:0}
+.f.c2{grid-column:span 2}.f.c4{grid-column:1/-1}
+.f>label,.f>.l{font-size:12px;font-weight:600;color:var(--muted)}
+.f input:not([type=checkbox]):not([type=radio]),.f select,.f textarea{background:var(--bg);border:1px solid var(--border);border-radius:9px;padding:8px 10px;width:100%;min-width:0}
+.f textarea{resize:vertical;min-height:80px}
+.f input:focus,.f textarea:focus,.f select:focus{outline:2px solid var(--accent);outline-offset:-1px;border-color:transparent}
+.hint{font-size:12px;color:var(--muted)}
+.hint button{border:none;background:none;color:var(--accent);cursor:pointer;padding:0;font-size:12px}
+.seg{display:flex;background:var(--bg);border:1px solid var(--border);border-radius:9px;padding:3px;gap:3px}
+.seg label{flex:1;position:relative;cursor:pointer}
+.seg input{position:absolute;opacity:0;pointer-events:none}
+.seg span{display:block;text-align:center;padding:5px 8px;border-radius:7px;font-weight:600;font-size:13px;color:var(--muted);white-space:nowrap}
+.seg input:checked+span{background:var(--surface);color:var(--text);box-shadow:0 1px 2px rgba(0,0,0,.12)}
+.seg input:checked+span.s-BUY,.seg input:checked+span.s-WIN{background:var(--win-bg);color:var(--win)}
+.seg input:checked+span.s-SELL,.seg input:checked+span.s-LOSS{background:var(--loss-bg);color:var(--loss)}
+.seg input:checked+span.s-MGC{background:var(--gold-bg);color:var(--gold)}
+.seg input:checked+span.s-MNQ{background:var(--nq-bg);color:var(--nq)}
+.check{display:flex;align-items:center;gap:8px;font-weight:500;cursor:pointer;padding:8px 0}
+.check input{width:16px;height:16px;accent-color:var(--accent)}
+.section-t{grid-column:1/-1;font-size:13px;font-weight:650;margin:8px 0 -4px;padding-top:12px;border-top:1px solid var(--border)}
+.analysis{display:grid;grid-template-columns:1fr 1fr;gap:16px;grid-column:1/-1}
+.analysis .col{display:flex;flex-direction:column;gap:8px;min-width:0}
+.analysis h4{margin:0;font-size:13px;display:flex;align-items:center;gap:8px}
+.analysis h4 .badge{font-weight:600}
+.zone{border:1.5px dashed var(--border);border-radius:10px;padding:8px;background:var(--bg);transition:border-color .15s}
+.zone.active{border-color:var(--accent)}
+.zone.drag{border-color:var(--accent);background:var(--surface-2)}
+.thumbs{display:grid;grid-template-columns:repeat(auto-fill,minmax(96px,1fr));gap:8px}
+.thumbs:not(:empty){margin-bottom:8px}
+.tw{position:relative;aspect-ratio:16/10;border-radius:7px;overflow:hidden;background:var(--surface-2)}
+.tw img{width:100%;height:100%;object-fit:cover;display:block;cursor:zoom-in}
+.tw button{position:absolute;top:3px;right:3px;width:22px;height:22px;border-radius:50%;border:none;background:rgba(0,0,0,.65);color:#fff;cursor:pointer;font-size:14px;line-height:22px;padding:0}
+.drop{display:flex;flex-direction:column;align-items:center;gap:2px;padding:12px 8px;border-radius:8px;cursor:pointer;color:var(--muted);text-align:center}
+.drop:hover{background:var(--surface-2)}
+.drop b{color:var(--accent);font-weight:600}
+.drop small{font-size:11px}
+
+/* detail */
+.dhead{display:flex;flex-wrap:wrap;gap:16px;align-items:flex-end;margin-bottom:16px}
+.dhead .big{font-size:30px;font-weight:700;letter-spacing:-.02em;line-height:1}
+.kv{display:grid;grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:8px;margin-bottom:18px}
+.kv div{background:var(--bg);border:1px solid var(--border);border-radius:9px;padding:7px 12px;min-width:0;overflow-wrap:anywhere}
+.kv span{display:block;font-size:11px;color:var(--muted);font-weight:500}
+.kv b{font-weight:600}
+.dcols{display:grid;grid-template-columns:1fr 1fr;gap:18px}
+.dcol h4{margin:0 0 8px;font-size:13px;display:flex;gap:8px;align-items:center}
+.dcol .txt{white-space:pre-wrap;background:var(--bg);border:1px solid var(--border);border-radius:9px;padding:10px 12px;margin-bottom:10px;min-height:42px;overflow-wrap:anywhere}
+.dcol .txt.none{color:var(--muted);font-style:italic}
+.dimgs{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:8px}
+.dimgs img{width:100%;aspect-ratio:16/10;object-fit:cover;border-radius:8px;cursor:zoom-in;display:block;background:var(--surface-2)}
+.lesson{margin-top:18px}
+
+/* lightbox */
+.lb{position:fixed;inset:0;background:rgba(0,0,0,.92);display:none;z-index:1000;flex-direction:column}
+.lb.open{display:flex}
+.lb .bar{display:flex;align-items:center;gap:10px;padding:10px 14px;color:#e6e9ee}
+.lb .bar .x{color:#e6e9ee}
+.lb .stage{flex:1;display:flex;align-items:center;justify-content:center;min-height:0;padding:0 8px 16px;position:relative}
+.lb img{max-width:100%;max-height:100%;object-fit:contain;user-select:none}
+.lb .nav{position:absolute;top:50%;transform:translateY(-50%);background:rgba(255,255,255,.12);color:#fff;border:none;width:44px;height:44px;border-radius:50%;font-size:22px;cursor:pointer}
+.lb .nav:hover{background:rgba(255,255,255,.22)}
+.lb .prev{left:12px}.lb .next{right:12px}
+
+.toast{position:fixed;left:50%;bottom:20px;transform:translateX(-50%) translateY(20px);background:var(--text);color:var(--bg);padding:9px 16px;border-radius:9px;font-weight:500;opacity:0;transition:.2s;pointer-events:none;z-index:2000;max-width:calc(100vw - 32px)}
+.toast.show{opacity:1;transform:translateX(-50%)}
+
+@media (max-width:960px){
+  .stats{grid-template-columns:repeat(3,minmax(0,1fr))}
+  .row2{grid-template-columns:1fr}
+}
+@media (max-width:600px){
+  .breakdown td.bar,.breakdown th.bar{display:none}
+  .breakdown td.setup-name{max-width:120px}
+}
+@media (max-width:720px){
+  .grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .analysis,.dcols{grid-template-columns:1fr}
+  .trade{grid-template-columns:56px 1fr auto;grid-template-areas:"t d p" "t m r";gap:4px 12px}
+  .trade .thumb{grid-area:t;width:56px;height:56px}
+  .trade .date{grid-area:d}.trade .ins{grid-area:m}.trade .meta{display:none}
+  .trade .res{grid-area:r;justify-self:end}.trade .pnl{grid-area:p}
+  .trade .date b{display:inline;margin-right:6px}
+}
+@media (max-width:480px){
+  .stats{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .stat .val{font-size:19px}
+  header.top .btn span.t{display:none}
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <h1><span id="jName">Trading Journal</span><button class="rename" id="renameBtn" title="Tukar nama journal" aria-label="Tukar nama journal">✎</button><small id="jSub"></small></h1>
+    <div class="spacer"></div>
+    <button class="btn" id="themeBtn" title="Tukar tema" aria-label="Tukar tema">☀︎/☾</button>
+    <button class="btn" id="exportBtn" title="Backup semua data (termasuk gambar)">⤓ <span class="t">Backup</span></button>
+    <button class="btn" id="importBtn" title="Restore dari fail backup">⤒ <span class="t">Restore</span></button>
+    <button class="btn" id="csvBtn" title="Export ke CSV (Excel)">▦ <span class="t">CSV</span></button>
+    <button class="btn primary" id="newBtn">＋ Trade Baru</button>
+    <input type="file" id="importFile" accept="application/json,.json" hidden>
+  </header>
+
+  <div class="sechead"><h2>Ringkasan keseluruhan</h2><span id="scope"></span></div>
+  <section class="stats" id="stats"></section>
+
+  <section class="row2">
+    <div class="card panel">
+      <h2>Equity curve (P/L terkumpul)</h2>
+      <div class="chart" id="chart"></div>
+    </div>
+    <div class="card panel">
+      <h2>Ikut instrument</h2>
+      <table class="breakdown" id="breakdown"></table>
+    </div>
+  </section>
+
+  <section class="card panel setups">
+    <h2>Prestasi ikut setup</h2>
+    <table class="breakdown" id="setupTbl"></table>
+  </section>
+
+  <section class="filters">
+    <select id="fInstr" aria-label="Instrument"><option value="">Semua instrument</option><option>MGC</option><option>MNQ</option></select>
+    <select id="fSide" aria-label="Position"><option value="">Buy &amp; Sell</option><option value="BUY">Buy sahaja</option><option value="SELL">Sell sahaja</option></select>
+    <select id="fResult" aria-label="Result"><option value="">Semua result</option><option value="WIN">Success</option><option value="LOSS">Fail</option><option value="BE">Breakeven</option></select>
+    <input type="date" id="fFrom" aria-label="Dari tarikh" title="Dari tarikh">
+    <input type="date" id="fTo" aria-label="Hingga tarikh" title="Hingga tarikh">
+    <input type="search" id="fQ" placeholder="Cari setup, nota…">
+    <span class="count" id="count"></span>
+  </section>
+
+  <section class="list" id="list"></section>
+</div>
+
+<!-- Form dialog -->
+<dialog id="formDlg">
+  <form class="dlg" id="tradeForm" novalidate>
+    <div class="dlg-h"><h3 id="formTitle">Trade Baru</h3><div class="spacer"></div><button type="button" class="x" data-close aria-label="Tutup">×</button></div>
+    <div class="dlg-b">
+      <div class="grid">
+        <div class="f"><label for="f-date">Tarikh</label><input type="date" id="f-date" required></div>
+        <div class="f"><label for="f-time">Masa entry</label><input type="time" id="f-time"></div>
+        <div class="f c2"><span class="l">Instrument</span>
+          <div class="seg" role="radiogroup" aria-label="Instrument">
+            <label><input type="radio" name="instr" value="MGC" checked><span class="s-MGC">MGC · Gold</span></label>
+            <label><input type="radio" name="instr" value="MNQ"><span class="s-MNQ">MNQ · Nasdaq</span></label>
+            <label><input type="radio" name="instr" value="OTHER"><span>Lain-lain</span></label>
+          </div>
+        </div>
+        <div class="f c2" id="otherWrap" hidden>
+          <div class="grid" style="grid-template-columns:1fr 1fr">
+            <div class="f"><label for="f-sym">Simbol</label><input id="f-sym" placeholder="cth: MES, GC, NQ"></div>
+            <div class="f"><label for="f-pv">USD per 1 point</label><input id="f-pv" type="number" step="any" inputmode="decimal" placeholder="cth: 5"></div>
+          </div>
+        </div>
+        <div class="f c2"><span class="l">Position</span>
+          <div class="seg" role="radiogroup" aria-label="Position">
+            <label><input type="radio" name="side" value="BUY" checked><span class="s-BUY">Buy / Long</span></label>
+            <label><input type="radio" name="side" value="SELL"><span class="s-SELL">Sell / Short</span></label>
+          </div>
+        </div>
+        <div class="f"><label for="f-qty">Kontrak</label><input id="f-qty" type="number" min="0" step="1" inputmode="numeric" value="1"></div>
+        <div class="f"><label for="f-setup">Setup / Strategi</label><input id="f-setup" list="setupList" placeholder="cth: Breakout"><datalist id="setupList"></datalist></div>
+
+        <div class="f"><label for="f-entry">Harga entry</label><input id="f-entry" type="number" step="any" inputmode="decimal"></div>
+        <div class="f"><label for="f-exit">Harga exit</label><input id="f-exit" type="number" step="any" inputmode="decimal"></div>
+        <div class="f"><label for="f-sl">Stop loss</label><input id="f-sl" type="number" step="any" inputmode="decimal"></div>
+        <div class="f"><label for="f-tp">Take profit</label><input id="f-tp" type="number" step="any" inputmode="decimal"></div>
+
+        <div class="f"><label for="f-fees">Komisen / fees (USD)</label><input id="f-fees" type="number" step="any" min="0" inputmode="decimal" placeholder="0"></div>
+        <div class="f"><label for="f-pnl">Profit / Loss (USD)</label><input id="f-pnl" type="number" step="any" inputmode="decimal" placeholder="cth: 120 atau -45" required>
+          <div class="hint" id="pnlHint"></div></div>
+        <div class="f c2"><span class="l">Result</span>
+          <div class="seg" role="radiogroup" aria-label="Result">
+            <label><input type="radio" name="result" value="WIN"><span class="s-WIN">Success</span></label>
+            <label><input type="radio" name="result" value="LOSS"><span class="s-LOSS">Fail</span></label>
+            <label><input type="radio" name="result" value="BE"><span>Breakeven</span></label>
+          </div>
+        </div>
+        <div class="f c4"><label class="check"><input type="checkbox" id="f-plan" checked> Saya ikut trading plan untuk trade ini</label></div>
+
+        <div class="section-t">Analisis</div>
+        <div class="analysis">
+          <div class="col">
+            <h4><span class="badge">SEBELUM</span> Analisis / plan sebelum entry</h4>
+            <textarea id="f-before" placeholder="Kenapa ambil trade ni? Bias, level penting, confluence, news…" style="background:var(--bg);border:1px solid var(--border);border-radius:9px;padding:8px 10px;min-height:90px;resize:vertical"></textarea>
+            <div class="zone" data-zone="before" tabindex="0">
+              <div class="thumbs"></div>
+              <label class="drop"><input type="file" accept="image/*" multiple hidden><b>+ Upload chart sebelum</b><small>Klik, seret &amp; lepas, atau tampal (Ctrl+V)</small></label>
+            </div>
+          </div>
+          <div class="col">
+            <h4><span class="badge">SELEPAS</span> Review selepas kejadian</h4>
+            <textarea id="f-after" placeholder="Apa yang berlaku? Harga pergi mana? Entry/exit betul?" style="background:var(--bg);border:1px solid var(--border);border-radius:9px;padding:8px 10px;min-height:90px;resize:vertical"></textarea>
+            <div class="zone" data-zone="after" tabindex="0">
+              <div class="thumbs"></div>
+              <label class="drop"><input type="file" accept="image/*" multiple hidden><b>+ Upload chart selepas</b><small>Klik, seret &amp; lepas, atau tampal (Ctrl+V)</small></label>
+            </div>
+          </div>
+        </div>
+        <div class="f c4"><label for="f-lesson">Pengajaran / nota</label><textarea id="f-lesson" placeholder="Apa yang saya belajar dari trade ni?"></textarea></div>
+      </div>
+    </div>
+    <div class="dlg-f">
+      <button type="button" class="btn" data-close>Batal</button>
+      <button type="submit" class="btn primary" id="saveBtn">Simpan trade</button>
+    </div>
+  </form>
+</dialog>
+
+<!-- Rename dialog -->
+<dialog id="nameDlg" style="max-width:440px">
+  <form class="dlg" id="nameForm">
+    <div class="dlg-h"><h3>Tukar nama journal</h3><div class="spacer"></div><button type="button" class="x" data-close aria-label="Tutup">×</button></div>
+    <div class="dlg-b" style="display:flex;flex-direction:column;gap:12px">
+      <div class="f"><label for="n-name">Nama journal</label><input id="n-name" maxlength="60" placeholder="cth: Ali Trading Journal"></div>
+      <div class="f"><label for="n-sub">Keterangan (pilihan)</label><input id="n-sub" maxlength="100" placeholder="cth: MGC · MNQ · NY session"></div>
+      <div class="hint">Nama ini dipaparkan di atas, di tab browser dan pada nama fail backup / CSV.</div>
+    </div>
+    <div class="dlg-f"><button type="button" class="btn" data-close>Batal</button><button type="submit" class="btn primary">Simpan nama</button></div>
+  </form>
+</dialog>
+
+<!-- Detail dialog -->
+<dialog id="detailDlg">
+  <div class="dlg">
+    <div class="dlg-h"><h3 id="dTitle">Trade</h3><div class="spacer"></div><button type="button" class="x" data-close aria-label="Tutup">×</button></div>
+    <div class="dlg-b" id="dBody"></div>
+    <div class="dlg-f">
+      <button type="button" class="btn danger" id="delBtn">Padam</button>
+      <div class="spacer"></div>
+      <button type="button" class="btn" id="dupBtn" title="Salin detail ke trade baru">Salin</button>
+      <button type="button" class="btn primary" id="editBtn">Edit</button>
+    </div>
+  </div>
+</dialog>
+
+<div class="lb" id="lb" role="dialog" aria-modal="true" aria-label="Gambar">
+  <div class="bar"><span id="lbCap"></span><div class="spacer"></div><button class="x" id="lbClose" aria-label="Tutup">×</button></div>
+  <div class="stage"><button class="nav prev" id="lbPrev" aria-label="Sebelum">‹</button><img id="lbImg" alt=""><button class="nav next" id="lbNext" aria-label="Seterusnya">›</button></div>
+</div>
+<div class="toast" id="toast"></div>
+
+<script>
+'use strict';
+/* ---------- Instrument specs ---------- */
+// USD value of a 1.00 point move per contract
+const INSTR = {
+  MGC: { name: 'Micro Gold', pv: 10 },       // 10 troy oz, tick 0.10 = $1
+  MNQ: { name: 'Micro Nasdaq-100', pv: 2 },  // $2 x index, tick 0.25 = $0.50
+};
+const RESULT_LABEL = { WIN: 'Success', LOSS: 'Fail', BE: 'Breakeven' };
+const SIDE_LABEL = { BUY: 'Buy', SELL: 'Sell' };
+
+/* ---------- IndexedDB ---------- */
+const dbp = new Promise((res, rej) => {
+  const r = indexedDB.open('akintraday-journal', 1);
+  r.onupgradeneeded = () => {
+    const db = r.result;
+    if (!db.objectStoreNames.contains('trades')) db.createObjectStore('trades', { keyPath: 'id' });
+    if (!db.objectStoreNames.contains('images')) db.createObjectStore('images', { keyPath: 'id' });
+  };
+  r.onsuccess = () => res(r.result);
+  r.onerror = () => rej(r.error);
+});
+const req = r => new Promise((res, rej) => { r.onsuccess = () => res(r.result); r.onerror = () => rej(r.error); });
+async function os(name, mode = 'readonly') { return (await dbp).transaction(name, mode).objectStore(name); }
+const idb = {
+  all: async n => req((await os(n)).getAll()),
+  get: async (n, k) => req((await os(n)).get(k)),
+  put: async (n, v) => req((await os(n, 'readwrite')).put(v)),
+  del: async (n, k) => req((await os(n, 'readwrite')).delete(k)),
+};
+
+/* ---------- helpers ---------- */
+const $ = s => document.querySelector(s);
+const uid = () => Date.now().toString(36) + Math.random().toString(36).slice(2, 8);
+const num = v => { if (v === '' || v == null) return null; const n = Number(v); return Number.isFinite(n) ? n : null; };
+const r2 = n => Math.round(n * 100) / 100;
+const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+const money = (n, sign = true) => {
+  if (n == null) return '–';
+  const s = Math.abs(n).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  return (n < 0 ? '−$' : (sign && n > 0 ? '+$' : '$')) + s;
+};
+const cls = n => n > 0 ? 'pos' : n < 0 ? 'neg' : '';
+const pctTxt = r => r == null ? '–' : Math.round(r * 100) + '%';
+const wlBar = S => S.n ? `<div class="wl" title="Win ${pctTxt(S.winRate)} · Loss ${pctTxt(S.lossRate)}${S.be ? ' · BE ' + pctTxt(S.beRate) : ''}"><i class="w" style="width:${S.winRate * 100}%"></i><i class="b" style="width:${S.beRate * 100}%"></i><i class="l" style="width:${S.lossRate * 100}%"></i></div>` : '';
+const fmtDate = d => { if (!d) return ''; const [y, m, day] = d.split('-').map(Number); return new Date(y, m - 1, day).toLocaleDateString('ms-MY', { day: 'numeric', month: 'short', year: 'numeric' }); };
+const weekday = d => { if (!d) return ''; const [y, m, day] = d.split('-').map(Number); return new Date(y, m - 1, day).toLocaleDateString('ms-MY', { weekday: 'long' }); };
+const todayStr = () => { const d = new Date(); return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`; };
+const nowTime = () => { const d = new Date(); return `${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`; };
+const instrKey = sym => INSTR[sym] ? sym : 'OTHER';
+const sortKey = t => `${t.date || ''} ${t.time || ''} ${t.createdAt || ''}`;
+let toastT;
+function toast(msg) { const el = $('#toast'); el.textContent = msg; el.classList.add('show'); clearTimeout(toastT); toastT = setTimeout(() => el.classList.remove('show'), 2400); }
+
+// object URL cache for stored images
+const urls = new Map();
+function urlFor(id, blob) { if (!urls.has(id) && blob) urls.set(id, URL.createObjectURL(blob)); return urls.get(id); }
+async function imgUrl(id) {
+  if (urls.has(id)) return urls.get(id);
+  const rec = await idb.get('images', id);
+  return rec ? urlFor(id, rec.blob) : null;
+}
+function dropUrl(id) { const u = urls.get(id); if (u) { URL.revokeObjectURL(u); urls.delete(id); } }
+
+/* ---------- theme ---------- */
+const THEMES = ['auto', 'light', 'dark'];
+let theme = 'auto';
+try { theme = localStorage.getItem('akj-theme') || 'auto'; } catch {}
+function applyTheme() {
+  if (theme === 'auto') document.documentElement.removeAttribute('data-theme');
+  else document.documentElement.setAttribute('data-theme', theme);
+  $('#themeBtn').title = 'Tema: ' + { auto: 'ikut sistem', light: 'cerah', dark: 'gelap' }[theme];
+}
+$('#themeBtn').onclick = () => {
+  theme = THEMES[(THEMES.indexOf(theme) + 1) % 3];
+  try { localStorage.setItem('akj-theme', theme); } catch {}
+  applyTheme(); toast($('#themeBtn').title);
+};
+applyTheme();
+
+/* ---------- journal name ---------- */
+const DEFAULT_SUB = 'MGC · MNQ · analisis sebelum & selepas';
+const settings = { name: 'Trading Journal', sub: DEFAULT_SUB };
+try { Object.assign(settings, JSON.parse(localStorage.getItem('akj-settings') || '{}')); } catch {}
+function applyName() {
+  $('#jName').textContent = settings.name;
+  $('#jSub').textContent = settings.sub;
+  document.title = settings.name;
+}
+function saveSettings() { try { localStorage.setItem('akj-settings', JSON.stringify(settings)); } catch {} applyName(); }
+const fileSlug = () => settings.name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '') || 'trading-journal';
+$('#renameBtn').onclick = () => { $('#n-name').value = settings.name; $('#n-sub').value = settings.sub; $('#nameDlg').showModal(); $('#n-name').select(); };
+$('#nameForm').addEventListener('submit', e => {
+  e.preventDefault();
+  settings.name = $('#n-name').value.trim() || 'Trading Journal';
+  settings.sub = $('#n-sub').value.trim();
+  saveSettings(); $('#nameDlg').close(); toast('Nama journal dikemaskini');
+});
+applyName();
+
+/* ---------- state ---------- */
+let trades = [];
+const F = { instr: '', side: '', result: '', from: '', to: '', q: '' };
+
+async function load() { trades = await idb.all('trades'); render(); }
+
+function filtered() {
+  const q = F.q.trim().toLowerCase();
+  return trades.filter(t =>
+    (!F.instr || t.instrument === F.instr) &&
+    (!F.side || t.side === F.side) &&
+    (!F.result || t.result === F.result) &&
+    (!F.from || t.date >= F.from) &&
+    (!F.to || t.date <= F.to) &&
+    (!q || [t.instrument, t.setup, t.beforeText, t.afterText, t.lesson].some(s => (s || '').toLowerCase().includes(q)))
+  ).sort((a, b) => sortKey(b).localeCompare(sortKey(a)));
+}
+
+function summarize(list) {
+  const wins = list.filter(t => t.result === 'WIN'), losses = list.filter(t => t.result === 'LOSS');
+  const total = list.reduce((s, t) => s + (t.pnl || 0), 0);
+  const grossWin = list.filter(t => t.pnl > 0).reduce((s, t) => s + t.pnl, 0);
+  const grossLoss = -list.filter(t => t.pnl < 0).reduce((s, t) => s + t.pnl, 0);
+  const decided = wins.length + losses.length;
+  return {
+    n: list.length, total, wins: wins.length, losses: losses.length,
+    be: list.length - decided,
+    winRate: list.length ? wins.length / list.length : null,
+    lossRate: list.length ? losses.length / list.length : null,
+    beRate: list.length ? (list.length - decided) / list.length : null,
+    grossWin, grossLoss,
+    avgWin: wins.length ? wins.reduce((s, t) => s + t.pnl, 0) / wins.length : null,
+    avgLoss: losses.length ? losses.reduce((s, t) => s + t.pnl, 0) / losses.length : null,
+    pf: grossLoss ? grossWin / grossLoss : (grossWin ? Infinity : null),
+    best: list.length ? Math.max(...list.map(t => t.pnl)) : null,
+    worst: list.length ? Math.min(...list.map(t => t.pnl)) : null,
+  };
+}
+
+/* ---------- render ---------- */
+function render() {
+  // instrument filter options include any custom symbols
+  const syms = [...new Set(['MGC', 'MNQ', ...trades.map(t => t.instrument)])];
+  const sel = $('#fInstr');
+  sel.innerHTML = '<option value="">Semua instrument</option>' + syms.map(s => `<option ${s === F.instr ? 'selected' : ''}>${esc(s)}</option>`).join('');
+  $('#setupList').innerHTML = [...new Set(trades.map(t => t.setup).filter(Boolean))].map(s => `<option value="${esc(s)}">`).join('');
+
+  const list = filtered();
+  const S = summarize(list);
+  const pf = S.pf == null ? '–' : S.pf === Infinity ? '∞' : S.pf.toFixed(2);
+  const filtering = Object.values(F).some(v => v);
+  $('#scope').textContent = filtering ? `ikut filter · ${list.length} daripada ${trades.length} trade` : `semua ${trades.length} trade`;
+  $('#stats').innerHTML = `
+    <div class="card stat"><div class="lbl">Net P/L</div><div class="val num ${cls(S.total)}">${money(S.total)}</div><div class="sub">${S.n} trade</div></div>
+    <div class="card stat"><div class="lbl">Jumlah profit</div><div class="val num pos">${S.grossWin ? money(S.grossWin) : '$0.00'}</div><div class="sub num">purata ${S.avgWin == null ? '–' : money(S.avgWin)} · terbaik ${S.best > 0 ? money(S.best) : '–'}</div></div>
+    <div class="card stat"><div class="lbl">Jumlah loss</div><div class="val num neg">${S.grossLoss ? money(-S.grossLoss) : '$0.00'}</div><div class="sub num">purata ${S.avgLoss == null ? '–' : money(S.avgLoss)} · terburuk ${S.worst < 0 ? money(S.worst) : '–'}</div></div>
+    <div class="card stat"><div class="lbl">Win / Loss</div><div class="val num"><span class="pos">${pctTxt(S.winRate)}</span> <span style="color:var(--muted);font-weight:400">/</span> <span class="neg">${pctTxt(S.lossRate)}</span></div><div class="sub num">${S.wins} success · ${S.losses} fail${S.be ? ' · ' + S.be + ' BE' : ''}</div>${wlBar(S)}</div>
+    <div class="card stat"><div class="lbl">Profit factor</div><div class="val num">${pf}</div><div class="sub">profit ÷ loss</div></div>
+    <div class="card stat"><div class="lbl">Ikut plan</div><div class="val num">${S.n ? Math.round(list.filter(t => t.followedPlan).length / S.n * 100) + '%' : '–'}</div><div class="sub">disiplin</div></div>`;
+
+  renderChart(list);
+
+  const by = {};
+  list.forEach(t => (by[t.instrument] ||= []).push(t));
+  const rows = Object.keys(by).sort().map(k => {
+    const s = summarize(by[k]);
+    return `<tr><td><span class="badge b-${instrKey(k)}">${esc(k)}</span></td><td class="num">${s.n}</td><td class="num pos">${pctTxt(s.winRate)}</td><td class="num neg">${pctTxt(s.lossRate)}</td><td class="num ${cls(s.total)}"><b>${money(s.total)}</b></td></tr>`;
+  });
+  const sides = ['BUY', 'SELL'].map(sd => {
+    const l = list.filter(t => t.side === sd); if (!l.length) return '';
+    const s = summarize(l);
+    return `<tr><td><span class="badge b-${sd}">${SIDE_LABEL[sd]}</span></td><td class="num">${s.n}</td><td class="num pos">${pctTxt(s.winRate)}</td><td class="num neg">${pctTxt(s.lossRate)}</td><td class="num ${cls(s.total)}"><b>${money(s.total)}</b></td></tr>`;
+  }).join('');
+  $('#breakdown').innerHTML = rows.length
+    ? `<tr><th></th><th>Trade</th><th>Win</th><th>Loss</th><th>P/L</th></tr>${rows.join('')}${sides}`
+    : '<tr><td style="border:none;color:var(--muted)">Tiada data lagi.</td></tr>';
+
+  const bySetup = {};
+  list.forEach(t => (bySetup[t.setup || ''] ||= []).push(t));
+  const setupRows = Object.entries(bySetup).map(([k, l]) => [k, summarize(l)]).sort((a, b) => b[1].total - a[1].total);
+  $('#setupTbl').innerHTML = setupRows.length
+    ? `<tr><th>Setup</th><th>Trade</th><th>Win %</th><th>Loss %</th><th class="bar"></th><th>Jumlah P/L</th></tr>` + setupRows.map(([k, s]) =>
+      `<tr><td class="setup-name" title="${esc(k)}">${k ? esc(k) : '<span style="color:var(--muted)">(tiada setup)</span>'}</td><td class="num">${s.n}</td><td class="num pos">${pctTxt(s.winRate)}</td><td class="num neg">${pctTxt(s.lossRate)}</td><td class="bar">${wlBar(s)}</td><td class="num ${cls(s.total)}"><b>${money(s.total)}</b></td></tr>`).join('')
+    : '<tr><td style="border:none;color:var(--muted)">Isi medan "Setup / Strategi" semasa rekod trade untuk lihat win/loss % setiap setup.</td></tr>';
+
+  $('#count').textContent = list.length === trades.length ? `${trades.length} trade` : `${list.length} / ${trades.length} trade`;
+
+  const L = $('#list');
+  if (!trades.length) {
+    L.innerHTML = `<div class="card emptystate"><b>Belum ada trade direkod</b>Klik <b style="display:inline;font-size:inherit">＋ Trade Baru</b> untuk mula journal anda.</div>`;
+    return;
+  }
+  if (!list.length) { L.innerHTML = `<div class="card emptystate">Tiada trade yang sepadan dengan filter.</div>`; return; }
+  L.innerHTML = list.map(t => {
+    const nImg = (t.beforeImages?.length || 0) + (t.afterImages?.length || 0);
+    const firstImg = t.beforeImages?.[0] || t.afterImages?.[0];
+    const prices = t.entry != null ? `${t.entry}${t.exit != null ? ' → ' + t.exit : ''}` : '';
+    return `<button class="card trade" data-id="${t.id}">
+      <div class="thumb" ${firstImg ? `data-img="${firstImg}"` : ''}>${firstImg ? '' : 'tiada<br>gambar'}</div>
+      <div class="date"><b>${fmtDate(t.date)}</b><span>${esc(t.time || weekday(t.date))}</span></div>
+      <div class="ins badges"><span class="badge b-${instrKey(t.instrument)}">${esc(t.instrument)}</span><span class="badge b-${t.side}">${SIDE_LABEL[t.side]}${t.qty ? ' ×' + t.qty : ''}</span></div>
+      <div class="meta"><div class="num">${esc(prices) || '<span>–</span>'}</div><div><span>${esc(t.setup || '')}${nImg ? (t.setup ? ' · ' : '') + nImg + ' gambar' : ''}</span></div></div>
+      <div class="res"><span class="badge b-${t.result}">${RESULT_LABEL[t.result]}</span></div>
+      <div class="pnl num ${cls(t.pnl)}">${money(t.pnl)}</div>
+    </button>`;
+  }).join('');
+  L.querySelectorAll('.thumb[data-img]').forEach(async el => {
+    const u = await imgUrl(el.dataset.img);
+    if (u) el.innerHTML = `<img src="${u}" alt="" loading="lazy">`;
+  });
+}
+
+function renderChart(list) {
+  const el = $('#chart');
+  const pts = [...list].sort((a, b) => sortKey(a).localeCompare(sortKey(b)));
+  if (pts.length < 1) { el.innerHTML = '<div class="empty">Equity curve akan muncul selepas trade pertama.</div>'; return; }
+  let cum = 0; const ys = [0, ...pts.map(t => (cum += t.pnl || 0))];
+  const W = 600, H = 170, pad = 8;
+  const max = Math.max(...ys), min = Math.min(...ys), span = (max - min) || 1;
+  const x = i => pad + i * (W - 2 * pad) / Math.max(1, ys.length - 1);
+  const y = v => pad + (max - v) * (H - 2 * pad) / span;
+  const line = ys.map((v, i) => `${x(i).toFixed(1)},${y(v).toFixed(1)}`).join(' ');
+  const end = ys[ys.length - 1];
+  const color = end >= 0 ? 'var(--win)' : 'var(--loss)';
+  el.innerHTML = `<svg viewBox="0 0 ${W} ${H}" preserveAspectRatio="none" aria-label="Equity curve">
+      <defs><linearGradient id="eg" x1="0" x2="0" y1="0" y2="1"><stop offset="0" stop-color="${color}" stop-opacity=".22"/><stop offset="1" stop-color="${color}" stop-opacity="0"/></linearGradient></defs>
+      <line x1="0" x2="${W}" y1="${y(0)}" y2="${y(0)}" stroke="var(--border)" stroke-dasharray="4 4" vector-effect="non-scaling-stroke"/>
+      <polygon points="${x(0)},${y(0)} ${line} ${x(ys.length - 1)},${y(0)}" fill="url(#eg)"/>
+      <polyline points="${line}" fill="none" stroke="${color}" stroke-width="2" stroke-linejoin="round" vector-effect="non-scaling-stroke"/>
+    </svg>
+    <span class="lab num" style="top:2px;left:4px">${money(max, false)}</span>
+    <span class="lab num" style="bottom:2px;left:4px">${money(min, false)}</span>
+    <span class="lab num" style="top:${Math.min(85, Math.max(5, y(end) / H * 100))}%;right:4px;transform:translateY(-50%);color:${color};font-weight:600">${money(end)}</span>`;
+}
+
+/* ---------- filters ---------- */
+[['#fInstr', 'instr'], ['#fSide', 'side'], ['#fResult', 'result'], ['#fFrom', 'from'], ['#fTo', 'to'], ['#fQ', 'q']].forEach(([s, k]) => {
+  $(s).addEventListener('input', e => { F[k] = e.target.value; render(); });
+});
+
+/* ---------- dialogs ---------- */
+document.querySelectorAll('dialog').forEach(d => {
+  d.addEventListener('click', e => { if (e.target === d) d.close(); });
+  d.querySelectorAll('[data-close]').forEach(b => b.onclick = () => d.close());
+});
+
+/* ---------- form ---------- */
+const form = $('#tradeForm'), formDlg = $('#formDlg');
+let editingId = null, pnlManual = false, resultManual = false;
+let formImgs = { before: [], after: [] }, origImgIds = [];
+let activeZone = 'before';
+
+const radio = name => form.querySelector(`input[name=${name}]:checked`)?.value || '';
+const setRadio = (name, v) => { const r = form.querySelector(`input[name=${name}][value="${v}"]`); if (r) r.checked = true; else form.querySelectorAll(`input[name=${name}]`).forEach(x => x.checked = false); };
+function currentSymbol() { const v = radio('instr'); return v === 'OTHER' ? $('#f-sym').value.trim().toUpperCase() : v; }
+function currentPV() { const v = radio('instr'); return v === 'OTHER' ? num($('#f-pv').value) : INSTR[v]?.pv ?? null; }
+
+function autoCalc() {
+  const pv = currentPV(), q = num($('#f-qty').value), en = num($('#f-entry').value), ex = num($('#f-exit').value);
+  if (pv == null || !q || en == null || ex == null) return null;
+  const pts = radio('side') === 'BUY' ? ex - en : en - ex;
+  const fees = num($('#f-fees').value) || 0;
+  return { pts, pv, q, fees, net: r2(pts * pv * q - fees) };
+}
+function syncCalc() {
+  const a = autoCalc();
+  if (a && !pnlManual) $('#f-pnl').value = a.net;
+  const h = $('#pnlHint');
+  if (a) {
+    const formula = `${r2(a.pts)} pt × $${a.pv} × ${a.q}${a.fees ? ` − $${a.fees}` : ''} = ${money(a.net)}`;
+    h.innerHTML = pnlManual && num($('#f-pnl').value) !== a.net
+      ? `Auto: ${esc(formula)} · <button type="button" id="useAuto">guna auto</button>`
+      : `Auto: ${esc(formula)}`;
+    $('#useAuto')?.addEventListener('click', () => { pnlManual = false; syncCalc(); });
+  } else h.textContent = 'Isi entry, exit & kontrak untuk kira automatik.';
+  if (!resultManual) {
+    const p = num($('#f-pnl').value);
+    setRadio('result', p == null ? '' : p > 0 ? 'WIN' : p < 0 ? 'LOSS' : 'BE');
+  }
+}
+['#f-qty', '#f-entry', '#f-exit', '#f-fees', '#f-pv'].forEach(s => $(s).addEventListener('input', syncCalc));
+form.querySelectorAll('input[name=side]').forEach(r => r.addEventListener('change', syncCalc));
+form.querySelectorAll('input[name=instr]').forEach(r => r.addEventListener('change', () => { $('#otherWrap').hidden = radio('instr') !== 'OTHER'; syncCalc(); }));
+form.querySelectorAll('input[name=result]').forEach(r => r.addEventListener('change', () => { resultManual = true; }));
+$('#f-pnl').addEventListener('input', () => { pnlManual = $('#f-pnl').value !== ''; syncCalc(); });
+
+function fillForm(t, { asCopy = false } = {}) {
+  form.reset();
+  pnlManual = false; resultManual = false;
+  $('#f-date').value = t?.date && !asCopy ? t.date : todayStr();
+  $('#f-time').value = t?.time && !asCopy ? t.time : nowTime();
+  const key = t ? instrKey(t.instrument) : 'MGC';
+  setRadio('instr', key);
+  $('#otherWrap').hidden = key !== 'OTHER';
+  $('#f-sym').value = key === 'OTHER' ? t.instrument : '';
+  $('#f-pv').value = key === 'OTHER' && t.pointValue != null ? t.pointValue : '';
+  setRadio('side', t?.side || 'BUY');
+  $('#f-qty').value = t?.qty ?? 1;
+  $('#f-setup').value = t?.setup || '';
+  $('#f-plan').checked = t ? !!t.followedPlan : true;
+  if (t && !asCopy) {
+    ['entry', 'exit', 'sl', 'tp', 'fees'].forEach(k => $('#f-' + k).value = t[k] ?? '');
+    $('#f-pnl').value = t.pnl ?? '';
+    $('#f-before').value = t.beforeText || '';
+    $('#f-after').value = t.afterText || '';
+    $('#f-lesson').value = t.lesson || '';
+    setRadio('result', t.result);
+    resultManual = true;
+    const a = autoCalc();
+    pnlManual = !a || a.net !== t.pnl;
+  } else {
+    setRadio('result', '');
+  }
+  syncCalc();
+}
+
+async function openForm(t, opts = {}) {
+  editingId = t && !opts.asCopy ? t.id : null;
+  $('#formTitle').textContent = editingId ? 'Edit Trade' : 'Trade Baru';
+  fillForm(t, opts);
+  formImgs = { before: [], after: [] };
+  origImgIds = [];
+  if (editingId) {
+    for (const z of ['before', 'after']) {
+      for (const id of t[z + 'Images'] || []) {
+        const rec = await idb.get('images', id);
+        if (rec) formImgs[z].push({ id, blob: rec.blob, stored: true });
+        origImgIds.push(id);
+      }
+    }
+  }
+  activeZone = 'before';
+  renderZones();
+  formDlg.showModal();
+  $('#f-date').blur();
+}
+
+function renderZones() {
+  form.querySelectorAll('.zone').forEach(zone => {
+    const z = zone.dataset.zone;
+    zone.classList.toggle('active', z === activeZone);
+    zone.querySelector('.thumbs').innerHTML = formImgs[z].map((im, i) =>
+      `<div class="tw"><img src="${urlFor(im.id, im.blob)}" alt="" data-i="${i}"><button type="button" data-rm="${i}" aria-label="Buang gambar">×</button></div>`).join('');
+  });
+}
+
+async function prepImage(file) {
+  // shrink very large screenshots to keep storage small; charts stay readable at 2400px
+  if (file.size < 900 * 1024) return file;
+  try {
+    const bmp = await createImageBitmap(file);
+    const s = Math.min(1, 2400 / Math.max(bmp.width, bmp.height));
+    const c = document.createElement('canvas');
+    c.width = Math.round(bmp.width * s); c.height = Math.round(bmp.height * s);
+    c.getContext('2d').drawImage(bmp, 0, 0, c.width, c.height);
+    const blob = await new Promise(r => c.toBlob(r, 'image/webp', 0.9));
+    return blob && blob.size < file.size ? blob : file;
+  } catch { return file; }
+}
+async function addFiles(zone, files) {
+  const imgs = [...files].filter(f => f.type.startsWith('image/'));
+  if (!imgs.length) return;
+  for (const f of imgs) formImgs[zone].push({ id: uid(), blob: await prepImage(f), stored: false });
+  activeZone = zone;
+  renderZones();
+}
+
+form.querySelectorAll('.zone').forEach(zone => {
+  const z = zone.dataset.zone;
+  const setActive = () => { activeZone = z; renderZones(); };
+  zone.addEventListener('focus', setActive);
+  zone.addEventListener('pointerdown', () => { activeZone = z; });
+  zone.querySelector('input[type=file]').addEventListener('change', e => { addFiles(z, e.target.files); e.target.value = ''; });
+  zone.addEventListener('dragover', e => { e.preventDefault(); zone.classList.add('drag'); });
+  zone.addEventListener('dragleave', () => zone.classList.remove('drag'));
+  zone.addEventListener('drop', e => { e.preventDefault(); zone.classList.remove('drag'); addFiles(z, e.dataTransfer.files); });
+  zone.addEventListener('click', e => {
+    const rm = e.target.closest('[data-rm]');
+    if (rm) { const [im] = formImgs[z].splice(+rm.dataset.rm, 1); if (!im.stored) dropUrl(im.id); renderZones(); return; }
+    const img = e.target.closest('img[data-i]');
+    if (img) openLightbox(formImgs[z].map(im => urlFor(im.id, im.blob)), +img.dataset.i, z === 'before' ? 'Sebelum' : 'Selepas');
+  });
+});
+// paste screenshots straight from clipboard (e.g. TradingView Ctrl+Alt+S, Win+Shift+S)
+document.addEventListener('paste', e => {
+  if (!formDlg.open) return;
+  const files = [...(e.clipboardData?.items || [])].filter(i => i.kind === 'file' && i.type.startsWith('image/')).map(i => i.getAsFile());
+  if (!files.length) return;
+  e.preventDefault();
+  const ta = document.activeElement?.id;
+  const zone = ta === 'f-after' ? 'after' : ta === 'f-before' ? 'before' : activeZone;
+  addFiles(zone, files);
+  toast(`Gambar ditampal ke "${zone === 'before' ? 'Sebelum' : 'Selepas'}"`);
+});
+$('#f-before').addEventListener('focus', () => { activeZone = 'before'; renderZones(); });
+$('#f-after').addEventListener('focus', () => { activeZone = 'after'; renderZones(); });
+
+formDlg.addEventListener('close', () => {
+  // free URLs for images that were added but never saved
+  for (const z of ['before', 'after']) formImgs[z].forEach(im => { if (!im.stored) dropUrl(im.id); });
+  formImgs = { before: [], after: [] };
+});
+
+form.addEventListener('submit', async e => {
+  e.preventDefault();
+  const sym = currentSymbol(), pnl = num($('#f-pnl').value), result = radio('result');
+  const err = !$('#f-date').value ? ['#f-date', 'Sila isi tarikh.']
+    : !sym ? ['#f-sym', 'Sila isi simbol instrument.']
+    : pnl == null ? ['#f-pnl', 'Sila isi profit / loss dalam USD.']
+    : !result ? [null, 'Sila pilih result: Success / Fail / Breakeven.'] : null;
+  if (err) { toast(err[1]); if (err[0]) $(err[0]).focus(); return; }
+
+  const old = editingId ? trades.find(t => t.id === editingId) : null;
+  const t = {
+    id: editingId || uid(),
+    date: $('#f-date').value, time: $('#f-time').value,
+    instrument: sym, pointValue: currentPV(), side: radio('side'),
+    qty: num($('#f-qty').value),
+    entry: num($('#f-entry').value), exit: num($('#f-exit').value),
+    sl: num($('#f-sl').value), tp: num($('#f-tp').value), fees: num($('#f-fees').value),
+    pnl: r2(pnl), result, setup: $('#f-setup').value.trim(), followedPlan: $('#f-plan').checked,
+    beforeText: $('#f-before').value, afterText: $('#f-after').value, lesson: $('#f-lesson').value,
+    beforeImages: formImgs.before.map(i => i.id), afterImages: formImgs.after.map(i => i.id),
+    createdAt: old?.createdAt || new Date().toISOString(), updatedAt: new Date().toISOString(),
+  };
+  $('#saveBtn').disabled = true;
+  try {
+    for (const z of ['before', 'after']) for (const im of formImgs[z]) if (!im.stored) { await idb.put('images', { id: im.id, blob: im.blob }); im.stored = true; }
+    const keep = new Set([...t.beforeImages, ...t.afterImages]);
+    for (const id of origImgIds) if (!keep.has(id)) { await idb.del('images', id); dropUrl(id); }
+    await idb.put('trades', t);
+    trades = trades.filter(x => x.id !== t.id).concat(t);
+    formDlg.close();
+    render();
+    toast(old ? 'Trade dikemaskini' : 'Trade disimpan');
+  } catch (ex) {
+    console.error(ex);
+    toast('Gagal simpan: ' + (ex?.name === 'QuotaExceededError' ? 'storage browser penuh. Buat Backup & buang gambar lama.' : ex?.message || ex));
+  } finally { $('#saveBtn').disabled = false; }
+});
+
+$('#newBtn').onclick = () => openForm(null);
+
+/* ---------- detail ---------- */
+const detailDlg = $('#detailDlg');
+let detailId = null;
+$('#list').addEventListener('click', e => { const b = e.target.closest('.trade'); if (b) openDetail(b.dataset.id); });
+
+async function openDetail(id) {
+  const t = trades.find(x => x.id === id); if (!t) return;
+  detailId = id;
+  $('#dTitle').textContent = `${fmtDate(t.date)}${t.time ? ' · ' + t.time : ''}`;
+  const pts = t.entry != null && t.exit != null ? r2(t.side === 'BUY' ? t.exit - t.entry : t.entry - t.exit) : null;
+  const risk = t.entry != null && t.sl != null ? Math.abs(t.entry - t.sl) : null;
+  const rr = risk && pts != null ? r2(pts / risk) : null;
+  const kv = [
+    ['Kontrak', t.qty ?? '–'], ['Entry', t.entry ?? '–'], ['Exit', t.exit ?? '–'],
+    ['Stop loss', t.sl ?? '–'], ['Take profit', t.tp ?? '–'],
+    ['Points', pts == null ? '–' : (pts > 0 ? '+' : '') + pts], ['R multiple', rr == null ? '–' : rr + 'R'],
+    ['Fees', t.fees ? money(t.fees, false) : '–'], ['Setup', esc(t.setup) || '–'], ['Ikut plan', t.followedPlan ? 'Ya ✓' : 'Tidak ✗'],
+  ];
+  const col = (z, label, text) => `<div class="dcol">
+      <h4><span class="badge">${label}</span>${(t[z + 'Images'] || []).length} gambar</h4>
+      <div class="txt ${text ? '' : 'none'}">${text ? esc(text) : 'Tiada nota.'}</div>
+      <div class="dimgs" data-zone="${z}">${(t[z + 'Images'] || []).map((id, i) => `<img data-id="${id}" data-i="${i}" alt="Chart ${label.toLowerCase()} ${i + 1}">`).join('')}</div>
+    </div>`;
+  $('#dBody').innerHTML = `
+    <div class="dhead">
+      <div><div class="badges" style="margin-bottom:8px"><span class="badge b-${instrKey(t.instrument)}">${esc(t.instrument)}${INSTR[t.instrument] ? ' · ' + INSTR[t.instrument].name : ''}</span><span class="badge b-${t.side}">${SIDE_LABEL[t.side]}</span><span class="badge b-${t.result}">${RESULT_LABEL[t.result]}</span></div>
+      <div class="big num ${cls(t.pnl)}">${money(t.pnl)}</div></div>
+    </div>
+    <div class="kv">${kv.map(([k, v]) => `<div><span>${k}</span><b class="num">${v}</b></div>`).join('')}</div>
+    <div class="dcols">${col('before', 'SEBELUM', t.beforeText)}${col('after', 'SELEPAS', t.afterText)}</div>
+    ${t.lesson ? `<div class="dcol lesson"><h4>Pengajaran / nota</h4><div class="txt">${esc(t.lesson)}</div></div>` : ''}`;
+  detailDlg.showModal();
+  $('#dBody').querySelectorAll('img[data-id]').forEach(async img => { const u = await imgUrl(img.dataset.id); if (u) img.src = u; });
+}
+$('#dBody').addEventListener('click', async e => {
+  const img = e.target.closest('img[data-id]'); if (!img) return;
+  const wrap = img.closest('.dimgs');
+  const list = await Promise.all([...wrap.querySelectorAll('img')].map(i => imgUrl(i.dataset.id)));
+  openLightbox(list, +img.dataset.i, wrap.dataset.zone === 'before' ? 'Sebelum' : 'Selepas');
+});
+$('#editBtn').onclick = () => { const t = trades.find(x => x.id === detailId); detailDlg.close(); openForm(t); };
+$('#dupBtn').onclick = () => { const t = trades.find(x => x.id === detailId); detailDlg.close(); openForm(t, { asCopy: true }); };
+$('#delBtn').onclick = async () => {
+  const t = trades.find(x => x.id === detailId);
+  if (!t || !confirm(`Padam trade ${t.instrument} ${fmtDate(t.date)} (${money(t.pnl)})? Gambar juga akan dipadam.`)) return;
+  for (const id of [...(t.beforeImages || []), ...(t.afterImages || [])]) { await idb.del('images', id); dropUrl(id); }
+  await idb.del('trades', t.id);
+  trades = trades.filter(x => x.id !== t.id);
+  detailDlg.close(); render(); toast('Trade dipadam');
+};
+
+/* ---------- lightbox ---------- */
+const lb = { list: [], i: 0, label: '' };
+function openLightbox(list, i, label) { lb.list = list.filter(Boolean); lb.i = Math.min(i, lb.list.length - 1); lb.label = label; showLb(); $('#lb').classList.add('open'); }
+function showLb() {
+  $('#lbImg').src = lb.list[lb.i];
+  $('#lbCap').textContent = `${lb.label} · ${lb.i + 1} / ${lb.list.length}`;
+  $('#lbPrev').hidden = $('#lbNext').hidden = lb.list.length < 2;
+}
+const lbStep = d => { lb.i = (lb.i + d + lb.list.length) % lb.list.length; showLb(); };
+const lbClose = () => $('#lb').classList.remove('open');
+$('#lbPrev').onclick = () => lbStep(-1);
+$('#lbNext').onclick = () => lbStep(1);
+$('#lbClose').onclick = lbClose;
+$('#lb').addEventListener('click', e => { if (e.target.classList.contains('stage')) lbClose(); });
+document.addEventListener('keydown', e => {
+  if (!$('#lb').classList.contains('open')) return;
+  if (e.key === 'Escape') { e.preventDefault(); e.stopPropagation(); lbClose(); }
+  else if (e.key === 'ArrowLeft') lbStep(-1);
+  else if (e.key === 'ArrowRight') lbStep(1);
+}, true);
+
+/* ---------- backup / restore / csv ---------- */
+const blobToB64 = b => new Promise((res, rej) => { const r = new FileReader(); r.onload = () => res(r.result); r.onerror = () => rej(r.error); r.readAsDataURL(b); });
+function b64ToBlob(dataUrl) {
+  const [head, data] = dataUrl.split(',');
+  const type = (head.match(/data:([^;]+)/) || [])[1] || 'image/png';
+  const bin = atob(data), arr = new Uint8Array(bin.length);
+  for (let i = 0; i < bin.length; i++) arr[i] = bin.charCodeAt(i);
+  return new Blob([arr], { type });
+}
+function download(name, content, type) {
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(new Blob([content], { type }));
+  a.download = name; document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(() => URL.revokeObjectURL(a.href), 2000);
+}
+$('#exportBtn').onclick = async () => {
+  if (!trades.length) return toast('Tiada data untuk backup.');
+  toast('Menyediakan backup…');
+  const images = [];
+  for (const rec of await idb.all('images')) images.push({ id: rec.id, data: await blobToB64(rec.blob) });
+  download(`${fileSlug()}-backup-${todayStr()}.json`, JSON.stringify({ app: 'akintraday-journal', version: 1, exportedAt: new Date().toISOString(), settings: { name: settings.name, sub: settings.sub }, trades, images }), 'application/json');
+};
+$('#importBtn').onclick = () => $('#importFile').click();
+$('#importFile').addEventListener('change', async e => {
+  const file = e.target.files[0]; e.target.value = '';
+  if (!file) return;
+  try {
+    const data = JSON.parse(await file.text());
+    if (data.app !== 'akintraday-journal' || !Array.isArray(data.trades)) throw new Error('Bukan fail backup journal ini.');
+    if (!confirm(`Restore ${data.trades.length} trade dan ${data.images?.length || 0} gambar? Trade dengan ID sama akan ditulis semula; trade lain dikekalkan.`)) return;
+    for (const im of data.images || []) { dropUrl(im.id); await idb.put('images', { id: im.id, blob: b64ToBlob(im.data) }); }
+    for (const t of data.trades) await idb.put('trades', t);
+    if (data.settings?.name) { settings.name = String(data.settings.name).slice(0, 60); settings.sub = String(data.settings.sub ?? '').slice(0, 100); saveSettings(); }
+    await load();
+    toast(`${data.trades.length} trade di-restore`);
+  } catch (ex) { toast('Restore gagal: ' + ex.message); }
+});
+$('#csvBtn').onclick = () => {
+  const list = filtered();
+  if (!list.length) return toast('Tiada trade untuk export.');
+  const cols = ['date', 'time', 'instrument', 'side', 'qty', 'entry', 'exit', 'sl', 'tp', 'fees', 'pnl', 'result', 'setup', 'followedPlan', 'beforeText', 'afterText', 'lesson'];
+  const cell = v => { const s = v == null ? '' : String(v); return /[",\n\r]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s; };
+  const rows = [cols.join(','), ...[...list].reverse().map(t => cols.map(c => cell(c === 'result' ? RESULT_LABEL[t.result] : t[c])).join(','))];
+  download(`${fileSlug()}-${todayStr()}.csv`, '﻿' + rows.join('\r\n'), 'text/csv');
+};
+
+/* ---------- storage persistence ---------- */
+navigator.storage?.persist?.().catch(() => {});
+
+load().catch(err => {
+  console.error(err);
+  $('#list').innerHTML = `<div class="card emptystate"><b>Storage browser tidak dapat dibuka</b>${esc(err?.message || err)}. Cuba buka dalam tab biasa (bukan incognito).</div>`;
+});
+</script>
+</body>
+</html>
