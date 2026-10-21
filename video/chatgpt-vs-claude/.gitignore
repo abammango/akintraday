@@ -3,3 +3,5 @@ assets/*.webm
 renders/
 .hyperframes/
 assets/*.wav
+compare/assets/
+compare/timing.json

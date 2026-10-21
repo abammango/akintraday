@@ -1,0 +1,106 @@
+<!doctype html>
+<html lang="ms">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=1080, height=1920" />
+    <title>Raw vs Claude edit</title>
+    <script src="assets/js/gsap.min.js"></script>
+    <style>
+      @font-face { font-family: "Montserrat"; font-weight: 800; src: url("assets/fonts/montserrat-latin-800-normal.woff2") format("woff2"); }
+      @font-face { font-family: "Montserrat"; font-weight: 900; src: url("assets/fonts/montserrat-latin-900-normal.woff2") format("woff2"); }
+      @font-face { font-family: "Poppins"; font-weight: 500; src: url("assets/fonts/poppins-latin-500-normal.woff2") format("woff2"); }
+      @font-face { font-family: "Poppins"; font-weight: 600; src: url("assets/fonts/poppins-latin-600-normal.woff2") format("woff2"); }
+      html, body { margin: 0; background: #0c0c0e; }
+      #root { position: relative; width: 100%; height: 100%; overflow: hidden; background: radial-gradient(120% 70% at 50% 35%, #1d1a18 0%, #0c0c0e 70%); }
+      .abs { position: absolute; }
+      #title { left: 0; right: 0; top: 120px; text-align: center; font-family: Montserrat; font-weight: 900; font-size: 92px; color: #fff; letter-spacing: 1px; }
+      #title i { font-style: normal; color: #F08A5D; }
+      #sub { left: 0; right: 0; top: 232px; text-align: center; font-family: Poppins; font-weight: 500; font-size: 36px; color: #a9a39b; }
+      .panel { top: 330px; width: 516px; height: 917px; border-radius: 28px; overflow: hidden; background: #000; }
+      #pl { left: 16px; box-shadow: 0 0 0 3px #3a3a3e; }
+      #pr { left: 548px; box-shadow: 0 0 0 4px #F08A5D, 0 0 60px rgba(240,138,93,.35); }
+      .pv { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+      .tag { top: 22px; left: 22px; font-family: Montserrat; font-weight: 900; font-size: 34px; padding: 10px 22px; border-radius: 14px; z-index: 5; }
+      #tl { background: rgba(0,0,0,.7); color: #fff; border: 2px solid rgba(255,255,255,.6); }
+      #tr { background: #F08A5D; color: #1a0f0a; }
+      .cut { left: 50%; top: 46%; font-family: Montserrat; font-weight: 900; font-size: 40px; color: #fff; background: #e5383b;
+              padding: 16px 28px; border-radius: 16px; white-space: nowrap; z-index: 6; opacity: 0; box-shadow: 0 10px 30px rgba(0,0,0,.5); }
+      .time { top: 1268px; width: 516px; text-align: center; font-family: Montserrat; font-weight: 900; font-size: 54px; color: #fff; }
+      .time small { display: block; font-family: Poppins; font-weight: 500; font-size: 28px; color: #8f8a84; margin-top: 2px; }
+      #timl { left: 16px; } #timr { left: 548px; color: #F08A5D; }
+      #list { left: 70px; right: 70px; top: 1440px; display: grid; grid-template-columns: 1fr 1fr; gap: 22px 30px; }
+      .it { font-family: Poppins; font-weight: 600; font-size: 31px; color: #ece6df; display: flex; align-items: center; gap: 14px; opacity: 0; }
+      .it b { width: 16px; height: 16px; border-radius: 50%; background: #F08A5D; flex: none; }
+      #endcard { inset: 0; background: rgba(12,12,14,.86); display: flex; flex-direction: column; align-items: center; justify-content: center; opacity: 0; z-index: 20; }
+      #endcard .big { font-family: Montserrat; font-weight: 900; font-size: 120px; color: #fff; }
+      #endcard .big i { font-style: normal; color: #F08A5D; }
+      #endcard .sm { font-family: Poppins; font-weight: 600; font-size: 40px; color: #cfc8bf; margin-top: 18px; }
+    </style>
+  </head>
+  <body>
+    <div id="root" data-composition-id="cmp" data-start="0" data-width="1080" data-height="1920" data-duration="30.4">
+      <div id="title" class="abs">RAW <i>vs</i> EDIT</div>
+      <div id="sub" class="abs">Diedit oleh Claude &middot; Hyperframes</div>
+
+      <div id="pl" class="abs panel">
+        <video id="rA" class="pv" src="assets/source.mp4" data-start="0.0" data-duration="1.7666" data-media-start="1.3333" data-track-index="0" muted playsinline></video>
+        <video id="rB" class="pv" src="assets/source.mp4" data-start="1.7667" data-duration="2.6" data-media-start="4.2667" data-track-index="1" muted playsinline></video>
+        <video id="rC1" class="pv" src="assets/source.mp4" data-start="4.3667" data-duration="1.7666" data-media-start="11.6667" data-track-index="0" muted playsinline></video>
+        <video id="rC2" class="pv" src="assets/source.mp4" data-start="6.1333" data-duration="5.4333" data-media-start="13.9" data-track-index="1" muted playsinline></video>
+        <video id="rD" class="pv" src="assets/source.mp4" data-start="11.5667" data-duration="2.7333" data-media-start="21.2333" data-track-index="0" muted playsinline></video>
+        <video id="rE" class="pv" src="assets/source.mp4" data-start="14.3" data-duration="1.6666" data-media-start="24.2667" data-track-index="1" muted playsinline></video>
+        <video id="rF" class="pv" src="assets/source.mp4" data-start="15.9667" data-duration="2.9333" data-media-start="26.6333" data-track-index="0" muted playsinline></video>
+        <video id="rG1" class="pv" src="assets/source.mp4" data-start="18.9" data-duration="3.0666" data-media-start="36.5667" data-track-index="1" muted playsinline></video>
+        <video id="rG2" class="pv" src="assets/source.mp4" data-start="21.9667" data-duration="3.7333" data-media-start="40.1333" data-track-index="0" muted playsinline></video>
+        <video id="rH" class="pv" src="assets/source.mp4" data-start="25.7" data-duration="3.1" data-media-start="45.3" data-track-index="1" muted playsinline></video>
+        <div id="tl" class="abs tag">RAW</div>
+          <div class="cut abs" id="cut0"><span>&#9986;</span> 1.3s dibuang</div>
+          <div class="cut abs" id="cut1"><span>&#9986;</span> 1.2s dibuang</div>
+          <div class="cut abs" id="cut2"><span>&#9986;</span> 4.8s dibuang</div>
+          <div class="cut abs" id="cut3"><span>&#9986;</span> 0.5s dibuang</div>
+          <div class="cut abs" id="cut4"><span>&#9986;</span> 1.9s dibuang</div>
+          <div class="cut abs" id="cut5"><span>&#9986;</span> 0.3s dibuang</div>
+          <div class="cut abs" id="cut6"><span>&#9986;</span> 0.7s dibuang</div>
+          <div class="cut abs" id="cut7"><span>&#9986;</span> 7.0s dibuang</div>
+          <div class="cut abs" id="cut8"><span>&#9986;</span> 0.5s dibuang</div>
+          <div class="cut abs" id="cut9"><span>&#9986;</span> 1.4s dibuang</div>
+      </div>
+      <div id="pr" class="abs panel">
+        <video id="edit" class="pv" src="assets/edit.mp4" data-start="0" data-duration="28.8" data-media-start="0" data-track-index="2" playsinline data-has-audio="true"></video>
+        <div id="tr" class="abs tag">CLAUDE EDIT</div>
+      </div>
+
+      <div id="timl" class="abs time">48.8s<small>video asal</small></div>
+      <div id="timr" class="abs time">28.8s<small>lepas edit (-20.0s)</small></div>
+
+      <div id="list" class="abs">
+        <div class="it"><b></b>Hook kuat di saat pertama</div>
+        <div class="it"><b></b>Ulangan &amp; jeda dibuang</div>
+        <div class="it"><b></b>Suara anak &amp; hum dibuang</div>
+        <div class="it"><b></b>Muzik original + SFX</div>
+        <div class="it"><b></b>Color grade premium</div>
+        <div class="it"><b></b>Motion graphics &amp; caption</div>
+        <div class="it"><b></b>Background blur AI</div>
+        <div class="it"><b></b>Logo &amp; typing atas jari</div>
+      </div>
+
+      <div id="endcard" class="abs"><div class="big">49s &rarr; <i>29s</i></div><div class="sm">Diedit sepenuhnya oleh Claude</div></div>
+    </div>
+    <script>
+      const CUTS = [[0.0, 1.3], [1.7667, 1.2], [4.3667, 4.8], [6.1333, 0.5], [11.5667, 1.9], [14.3, 0.3], [15.9667, 0.7], [18.9, 7.0], [21.9667, 0.5], [25.7, 1.4]];
+      const tl = gsap.timeline({ paused: true });
+      tl.fromTo("#title", { y: -30, opacity: 0 }, { y: 0, opacity: 1, duration: 0.5, ease: "power3.out" }, 0);
+      tl.fromTo("#sub", { opacity: 0 }, { opacity: 1, duration: 0.5 }, 0.2);
+      tl.fromTo(".it", { opacity: 0, y: 16 }, { opacity: 1, y: 0, duration: 0.35, stagger: 0.12, ease: "power2.out" }, 0.5);
+      CUTS.forEach(([t], i) => {
+        const el = "#cut" + i;
+        tl.set(el, { xPercent: -50, yPercent: -50 }, 0);
+        tl.fromTo(el, { opacity: 0, scale: 0.6 }, { opacity: 1, scale: 1, duration: 0.16, ease: "back.out(2.5)" }, t);
+        tl.to(el, { opacity: 0, duration: 0.2 }, t + 0.75);
+      });
+      tl.fromTo("#endcard", { opacity: 0 }, { opacity: 1, duration: 0.35 }, 28.8);
+      tl.fromTo("#endcard .big", { scale: 0.8 }, { scale: 1, duration: 0.45, ease: "back.out(2)" }, 28.8);
+      window.__timelines["cmp"] = tl;
+    </script>
+  </body>
+</html>
