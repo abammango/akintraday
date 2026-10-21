@@ -13,7 +13,7 @@ def fr(t):  # snap to frame grid
 # ---------------------------------------------------------------- cuts
 # (id, src_in, src_out, zoom)  -- source seconds in assets/source.mp4
 SEGMENTS = [
-    ("A", 1.233, 3.100, 1.14),   # Korang masih guna ChatGPT ke?          (hook; "Assalamualaikum guys" dibuang)
+    ("A", 1.333, 3.100, 1.14),   # Korang masih guna ChatGPT ke?          (hook; "Assalamualaikum guys" dibuang)
     ("B", 4.250, 6.867, 1.06),   # Aku rasa lebih baik korang guna Claude.
     # 7.19-9.29 "Yang lebih berbaloi yang aku rasa sekarang" dibuang (ulang)
     # 10.2-11.4 "sebab sebab" (gagap) dibuang
@@ -54,7 +54,7 @@ BLUR_T = out(BLUR_SRC)
 # ---------------------------------------------------------------- captions
 # (src_start, src_end, text, highlight-class or None)
 CAPTIONS = [
-    (1.25, 1.85, "KORANG MASIH", None),
+    (1.36, 1.85, "KORANG MASIH", None),
     (1.85, 3.08, "GUNA *CHATGPT* KE?", "gpt"),
     (4.30, 5.50, "AKU RASA LEBIH BAIK", None),
     (5.50, 6.22, "KORANG GUNA", None),

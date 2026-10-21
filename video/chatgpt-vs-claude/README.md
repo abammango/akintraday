@@ -1,14 +1,14 @@
 # ChatGPT vs Claude — Hyperframes edit
 
 Short-form talking-head edit (1080x1920) built with [Hyperframes](https://npm.im/hyperframes).
-Raw footage: `video_20261021_211339.mp4` (48.8s) → edit 28.9s.
+Raw footage: `video_20261021_211339.mp4` (48.8s) → edit 28.8s.
 
 ## Transkrip (dengan keputusan edit)
 
 | Source | Ucapan | Status |
 | --- | --- | --- |
-| 0.28–1.2 | Assalamualaikum guys, | dibuang — mula terus dengan hook |
-| 1.2–3.1 | Korang masih guna ChatGPT ke? | **HOOK** + logo ChatGPT atas jari |
+| 0.28–1.33 | Assalamualaikum guys, | dibuang — mula terus dengan hook |
+| 1.33–3.1 | Korang masih guna ChatGPT ke? | **HOOK** + logo ChatGPT atas jari |
 | 4.3–6.8 | Aku rasa lebih baik korang guna Claude. | ChatGPT → Claude |
 | 7.2–9.3 | Yang lebih berbaloi yang aku rasa sekarang. | dibuang (ulang) |
 | 10.2–11.4 | Sebab… sebab… | dibuang (gagap) |
