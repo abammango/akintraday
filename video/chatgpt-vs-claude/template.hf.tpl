@@ -68,6 +68,7 @@
       /* captions */
       .cap { position: absolute; left: 60px; right: 60px; top: 1360px; height: 200px; display: flex; align-items: center; justify-content: center; opacity: 0; }
       .capin { font-family: "Montserrat"; font-weight: 900; font-size: 78px; line-height: 1.08; color: #fff; text-align: center; -webkit-text-stroke: 12px #000; paint-order: stroke fill; text-shadow: 0 8px 24px rgba(0,0,0,.55); }
+      .capin .nw { white-space: nowrap; }
       .capin .gpt { color: #19C37D; }
       .capin .claude { color: #F08A5D; }
       .capin .hl { color: #FFD43B; }

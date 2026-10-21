@@ -1,0 +1,6 @@
+[
+ {"label":"A natural portrait","grading":{"preset":"skin-soft","intensity":0.6,"adjust":{"highlights":-0.1,"shadows":0.08,"temperature":0.04,"vibrance":0.03},"details":{"vignette":0.04}}},
+ {"label":"B premium cinematic","grading":{"preset":"skin-soft","intensity":0.55,"adjust":{"exposure":0.02,"contrast":0.12,"highlights":-0.18,"shadows":0.04,"blacks":-0.08,"temperature":0.05,"saturation":-0.04,"vibrance":0.06},"wheels":{"shadows":{"hue":200,"amount":0.1,"level":0},"highlights":{"hue":38,"amount":0.07,"level":0}},"details":{"vignette":0.14}}},
+ {"label":"C warm creator","grading":{"preset":"warm-daylight","intensity":0.6,"adjust":{"contrast":0.08,"highlights":-0.15,"blacks":-0.05,"vibrance":0.05},"wheels":{"shadows":{"hue":210,"amount":0.06,"level":0}},"details":{"vignette":0.1}}},
+ {"label":"D moody contrast","grading":{"preset":"deep-contrast","intensity":0.5,"adjust":{"highlights":-0.2,"temperature":0.06,"saturation":-0.08},"wheels":{"shadows":{"hue":195,"amount":0.12,"level":-0.02},"highlights":{"hue":35,"amount":0.08,"level":0}},"details":{"vignette":0.18}}}
+]

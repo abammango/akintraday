@@ -2,3 +2,4 @@ assets/*.mp4
 assets/*.webm
 renders/
 .hyperframes/
+assets/*.wav

@@ -17,15 +17,20 @@ SEGMENTS = [
     ("B", 4.250, 6.867, 1.06),   # Aku rasa lebih baik korang guna Claude.
     # 7.19-9.29 "Yang lebih berbaloi yang aku rasa sekarang" dibuang (ulang)
     # 10.2-11.4 "sebab sebab" (gagap) dibuang
-    ("C", 11.667, 19.333, 1.00), # Dalam Claude ... tak semestinya teks ... kreatif.
+    ("C1", 11.667, 13.420, 1.00), # Dalam Claude korang boleh
+    # 13.42-13.90 jeda + suara anak dibuang
+    ("C2", 13.900, 19.333, 1.07), # buat macam-macam ... tak semestinya teks ... kreatif.
     # 19.3-21.2 jeda dibuang
     ("D", 21.233, 23.967, 1.10), # Contoh macam sekarang, kalau tengok background aku biasa kan?
     ("E", 24.267, 25.933, 1.00), # Tapi kalau aku suruh Claude
     ("F", 26.633, 29.567, 1.08), # ubah background ni jadi blur  (+ hold untuk magic)
     # 30.6-36.5 "Dia akan blur. Ya? Ya. OK" dibuang (ulang / janggal)
-    ("G", 36.567, 43.867, 1.00), # Lepas ni aku akan share ... Claude dengan GitHub
+    ("G1", 36.567, 39.620, 1.06), # Lepas ni aku akan share macam mana
+    # 39.62-40.15 jeda + suara anak dibuang
+    ("G2", 40.150, 43.867, 1.00), # nak gabungkan Claude dengan GitHub
     ("H", 45.300, 48.400, 1.10), # Apa pun jangan lupa follow  (+ thumbs up)
 ]
+GRADE = json.dumps({"preset": "skin-soft", "intensity": 0.6, "adjust": {"exposure": 0.03, "contrast": 0.16, "highlights": -0.24, "shadows": 0.05, "blacks": -0.1, "temperature": 0.07, "tint": 0.06, "saturation": -0.05, "vibrance": 0.08}, "wheels": {"shadows": {"hue": 200, "amount": 0.14, "level": -0.01}, "highlights": {"hue": 36, "amount": 0.1, "level": 0}}, "secondaries": [{"key": {"hue": {"center": 110, "range": 45, "softness": 25}, "saturation": {"min": 0.03, "max": 1, "softness": 0.05}, "luma": {"min": 0.05, "max": 0.98, "softness": 0.08}}, "correction": {"saturation": -0.45, "hueShift": 40}}, {"key": {"hue": {"center": 22, "range": 18, "softness": 12}, "saturation": {"min": 0.12, "max": 0.8, "softness": 0.08}, "luma": {"min": 0.15, "max": 0.9, "softness": 0.1}}, "correction": {"saturation": 0.06, "luma": 0.03}}], "curves": {"master": [[0, 0.02], [0.25, 0.21], [0.75, 0.8], [1, 0.98]]}, "details": {"vignette": 0.2}}, separators=(",", ":"))  # "premium plus" grade (grade/grades2.json)
 BLUR_SRC = 28.32          # source time of the word "blur"
 BLUR_FILE_OFFSET = 26.0   # assets/blurred26.mp4 starts at this source time
 
@@ -55,8 +60,8 @@ CAPTIONS = [
     (5.50, 6.22, "KORANG GUNA", None),
     (6.22, 6.86, "*CLAUDE*", "claude"),
     (11.70, 12.50, "DALAM *CLAUDE*", "claude"),
-    (12.50, 13.40, "KORANG BOLEH", None),
-    (13.40, 14.98, "BUAT MACAM-MACAM", None),
+    (12.50, 13.42, "KORANG BOLEH", None),
+    (13.90, 14.98, "BUAT MACAM-MACAM", None),
     (15.02, 15.95, "DIA TAK SEMESTINYA", None),
     (15.95, 16.55, "*TEKS*", "hl"),
     (16.57, 17.40, "DIA BOLEH BUAT", None),
@@ -71,8 +76,8 @@ CAPTIONS = [
     (28.10, 29.50, "JADI *BLUR*", "hl"),
     (36.58, 37.60, "LEPAS NI", None),
     (37.90, 38.90, "AKU AKAN SHARE", None),
-    (38.90, 40.20, "MACAM MANA NAK", None),
-    (40.20, 41.00, "GABUNGKAN", None),
+    (38.90, 39.62, "MACAM MANA", None),
+    (40.15, 41.00, "NAK GABUNGKAN", None),
     (41.00, 41.70, "*CLAUDE*", "claude"),
     (41.70, 42.85, "DENGAN", None),
     (42.85, 43.86, "*GITHUB*", "hl"),
@@ -83,11 +88,11 @@ CAPTIONS = [
 # ---------------------------------------------------------------- sfx
 # (name, file, src_time, volume)
 SFX = [
-    ("whoosh-open", "whoosh.mp3", None, 0.45),           # t=0 hook entry
+    ("whoosh-open", "whoosh.mp3", None, 0.22),           # t=0 hook entry
     ("pop-gpt", "pop.mp3", 2.50, 0.55),                  # ChatGPT logo on finger
     ("whoosh-vs", "whoosh-short.mp3", 4.27, 0.40),       # logo flies to the top
     ("ping-claude", "ping.mp3", 6.22, 0.40),             # Claude logo lands
-    ("pop-chips", "pop.mp3", 13.45, 0.35),               # "macam-macam" chips
+    ("pop-chips", "pop.mp3", 13.95, 0.35),               # "macam-macam" chips
     ("typing", "typing.mp3", 15.98, 0.55),               # abammango typing
     ("sparkle-kreatif", "sparkle.mp3", 18.50, 0.35),
     ("pop-bgtag", "pop.mp3", 22.60, 0.40),               # BACKGROUND: BIASA tag
@@ -104,30 +109,41 @@ SFX = [
     ("click-follow", "click.mp3", 47.45, 0.65),
 ]
 
+SEG = {s["id"]: s for s in segs}
 T = {  # named moments in OUTPUT time
-    "gpt_in": out(2.47), "seg_b": segs[1]["start"], "claude_in": out(6.22), "seg_c": segs[2]["start"],
-    "chips_in": out(13.45), "chips_out": out(15.70), "type_in": out(15.92), "type_out": out(19.0),
-    "seg_d": segs[3]["start"], "bgtag_in": out(22.60), "seg_e": segs[4]["start"],
+    "gpt_in": out(2.47), "seg_b": SEG["B"]["start"], "claude_in": out(6.22), "seg_c": SEG["C1"]["start"],
+    "chips_in": out(13.95), "chips_out": out(15.70), "type_in": out(15.92), "type_out": out(19.0),
+    "seg_d": SEG["D"]["start"], "bgtag_in": out(22.60), "seg_e": SEG["E"]["start"],
     "card_in": out(25.42), "prompt_in": out(26.70), "prompt_end": out(28.10), "send": out(28.18),
-    "blur": BLUR_T, "seg_f_end": segs[5]["start"] + segs[5]["dur"], "seg_g": segs[6]["start"],
-    "claude2_in": out(41.00), "gh_in": out(42.85), "gh_out": out(43.80), "seg_h": segs[7]["start"],
+    "blur": BLUR_T, "seg_f_end": SEG["F"]["start"] + SEG["F"]["dur"], "seg_g": SEG["G1"]["start"],
+    "claude2_in": out(41.00), "gh_in": out(42.85), "gh_out": out(43.80), "seg_h": SEG["H"]["start"],
     "follow_in": out(46.65), "follow_click": out(47.45), "end": TOTAL,
 }
 
+MUSIC = (f'  <audio id="music" src="assets/music_bed.wav" data-start="0" data-duration="{TOTAL}" '
+         f'data-track-index="15" data-volume="1"></audio>')
+json.dump({"total": TOTAL, "fps": FPS, "segments": segs, "T": T},
+          open(os.path.join(os.path.dirname(__file__), "timing.json"), "w"), indent=1)
+
 # ---------------------------------------------------------------- html
 def video_tags():
-    base, blur = [], []
+    base, blur, voice = [], [], []
     for i, s in enumerate(segs):
+        # picture from source.mp4 (muted); sound from the cleaned voice track on the same clock
         base.append(
             f'      <video id="v{s["id"]}" class="seg" src="assets/source.mp4" data-start="{s["start"]}" '
             f'data-duration="{s["dur"]}" data-media-start="{s["a"]}" data-track-index="{i % 2}" '
-            f'data-fade-in="0.02" data-fade-out="0.03" playsinline data-has-audio="true"></video>')
+            f'muted playsinline data-color-grading=\'{GRADE}\'></video>')
+        voice.append(
+            f'  <audio id="a{s["id"]}" src="assets/voice_clean.wav" data-start="{s["start"]}" '
+            f'data-duration="{s["dur"]}" data-media-start="{s["a"]}" data-track-index="{10 + i % 2}" '
+            f'data-fade-in="0.015" data-fade-out="0.03"></audio>')
         if s["b"] > BLUR_SRC - 1.0:  # segments that need the blurred plate
             blur.append(
                 f'      <video id="b{s["id"]}" class="seg" src="assets/blurred26.mp4" data-start="{s["start"]}" '
                 f'data-duration="{s["dur"]}" data-media-start="{fr(s["a"] - BLUR_FILE_OFFSET)}" '
-                f'data-track-index="{2 + i % 2}" muted playsinline></video>')
-    return "\n".join(base), "\n".join(blur)
+                f'data-track-index="{2 + i % 2}" muted playsinline data-color-grading=\'{GRADE}\'></video>')
+    return "\n".join(base), "\n".join(blur), "\n".join(voice)
 
 def cap_html(text, cls):
     parts = text.split("*")
@@ -135,13 +151,19 @@ def cap_html(text, cls):
     for i, p in enumerate(parts):
         if not p:
             continue
+        # never break inside a hyphenated word (MACAM-MACAM)
+        p = " ".join(f'<span class="nw">{w}</span>' if "-" in w else w for w in p.split(" "))
         h += f'<span class="{cls}">{p}</span>' if i % 2 else p
     return h
+
+def cap_size(text):
+    n = len(text.replace("*", ""))
+    return "" if n < 15 else ' style="font-size:66px"' if n < 20 else ' style="font-size:62px"'
 
 def caption_tags():
     tags = []
     for i, (a, b, text, cls) in enumerate(CAPTIONS):
-        tags.append(f'    <div class="cap" id="cap{i}" data-in="{out(a)}" data-out="{out(b)}"><div class="capin">{cap_html(text, cls)}</div></div>')
+        tags.append(f'    <div class="cap" id="cap{i}" data-in="{out(a)}" data-out="{out(b)}"><div class="capin"{cap_size(text)}>{cap_html(text, cls)}</div></div>')
     return "\n".join(tags)
 
 def sfx_tags():
@@ -154,7 +176,7 @@ def sfx_tags():
         tags.append(f'  <audio id="sfx-{name}" src="assets/sfx/{f}" data-start="{st}" data-duration="{round(dur,3)}" data-track-index="{20 + i}" data-volume="{vol}"></audio>')
     return "\n".join(tags)
 
-base_v, blur_v = video_tags()
+base_v, blur_v, voice_a = video_tags()
 zooms = [(s["start"], s["z"]) for s in segs]
 caps = [(out(a), out(b)) for a, b, *_ in CAPTIONS]
 
@@ -163,7 +185,7 @@ html = (html.replace("{{TOTAL}}", str(TOTAL))
             .replace("{{BASE_VIDEOS}}", base_v)
             .replace("{{BLUR_VIDEOS}}", blur_v)
             .replace("{{CAPTIONS}}", caption_tags())
-            .replace("{{SFX}}", sfx_tags())
+            .replace("{{SFX}}", voice_a + "\n" + MUSIC + "\n" + sfx_tags())
             .replace("{{T_JSON}}", json.dumps(T))
             .replace("{{ZOOMS_JSON}}", json.dumps(zooms)))
 open(os.path.join(os.path.dirname(__file__), "index.html"), "w").write(html)
