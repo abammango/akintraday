@@ -1,6 +1,6 @@
 # akintraday
 
-**AK Trading Journal**: journal trading satu fail (`index.html`) untuk rekod trade MGC (Micro Gold), MNQ (Micro Nasdaq) dan instrument lain.
+**Trading Journal**: journal trading satu fail (`index.html`) untuk rekod trade MGC (Micro Gold), MNQ (Micro Nasdaq) dan instrument lain.
 
 ## Cara guna
 
@@ -27,9 +27,18 @@
 
 `P/L = points × nilai point × kontrak − fees` (Buy: exit − entry, Sell: entry − exit)
 
+## Tukar nama journal
+
+Klik ikon ✎ di sebelah nama di atas untuk letak nama sendiri (cth: *Ali Trading Journal*) dan keterangan. Nama ini dipaparkan di tab browser dan pada nama fail backup / CSV, jadi senang kongsi dengan kawan-kawan: setiap orang boleh guna fail yang sama dan letak nama masing-masing.
+
 ## Dashboard
 
-Jumlah P/L, win rate, profit factor, purata success/fail, % ikut plan, equity curve, dan pecahan ikut instrument & Buy/Sell. Boleh filter ikut instrument, position, result, julat tarikh dan carian teks.
+- **Ringkasan keseluruhan**: Net P/L, jumlah profit (USD), jumlah loss (USD), Win % / Loss %, profit factor dan % ikut plan
+- **Equity curve**
+- **Ikut instrument**: trade, Win %, Loss % dan P/L untuk MGC, MNQ, Buy dan Sell
+- **Prestasi ikut setup**: Win %, Loss % dan jumlah P/L bagi setiap setup / strategi
+
+Win % dan Loss % dikira daripada semua trade (baki ialah Breakeven). Semua angka ikut filter yang dipilih (instrument, position, result, julat tarikh, carian teks); tanpa filter ia menunjukkan keseluruhan.
 
 ## Data & backup
 

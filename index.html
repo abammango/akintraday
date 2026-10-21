@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>AK Trading Journal</title>
+<title>Trading Journal</title>
 <style>
 :root{
   --bg:#f5f6f8; --surface:#ffffff; --surface-2:#eef1f4; --border:#dfe3e8;
@@ -47,6 +47,17 @@ button,input,select,textarea{font:inherit;color:inherit}
 header.top{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:20px}
 header.top h1{font-size:20px;margin:0;letter-spacing:-.01em}
 header.top h1 small{display:block;font-size:12px;font-weight:500;color:var(--muted);letter-spacing:0}
+.rename{border:none;background:none;color:var(--muted);cursor:pointer;font-size:15px;padding:2px 6px;margin-left:4px;border-radius:6px;vertical-align:2px}
+.rename:hover{background:var(--surface-2);color:var(--accent)}
+.sechead{display:flex;align-items:baseline;gap:10px;margin:0 0 8px}
+.sechead h2{font-size:14px;margin:0}
+.sechead span{font-size:12px;color:var(--muted)}
+.wl{display:flex;height:6px;border-radius:3px;overflow:hidden;background:var(--surface-2);margin-top:6px;min-width:60px}
+.wl i{display:block;height:100%}
+.wl .w{background:var(--win)}.wl .l{background:var(--loss)}.wl .b{background:var(--be);opacity:.5}
+.setups{margin-bottom:16px}
+.breakdown td.bar{width:28%;padding-left:16px}
+.breakdown td.setup-name{max-width:220px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .spacer{flex:1}
 .btn{display:inline-flex;align-items:center;gap:6px;border:1px solid var(--border);background:var(--surface);padding:8px 14px;border-radius:9px;cursor:pointer;font-weight:500;white-space:nowrap}
 .btn:hover{background:var(--surface-2)}
@@ -188,6 +199,10 @@ dialog::backdrop{background:var(--overlay)}
   .stats{grid-template-columns:repeat(3,minmax(0,1fr))}
   .row2{grid-template-columns:1fr}
 }
+@media (max-width:600px){
+  .breakdown td.bar,.breakdown th.bar{display:none}
+  .breakdown td.setup-name{max-width:120px}
+}
 @media (max-width:720px){
   .grid{grid-template-columns:repeat(2,minmax(0,1fr))}
   .analysis,.dcols{grid-template-columns:1fr}
@@ -207,7 +222,7 @@ dialog::backdrop{background:var(--overlay)}
 <body>
 <div class="wrap">
   <header class="top">
-    <h1>AK Trading Journal<small>MGC · MNQ · analisis sebelum &amp; selepas</small></h1>
+    <h1><span id="jName">Trading Journal</span><button class="rename" id="renameBtn" title="Tukar nama journal" aria-label="Tukar nama journal">✎</button><small id="jSub"></small></h1>
     <div class="spacer"></div>
     <button class="btn" id="themeBtn" title="Tukar tema" aria-label="Tukar tema">☀︎/☾</button>
     <button class="btn" id="exportBtn" title="Backup semua data (termasuk gambar)">⤓ <span class="t">Backup</span></button>
@@ -217,6 +232,7 @@ dialog::backdrop{background:var(--overlay)}
     <input type="file" id="importFile" accept="application/json,.json" hidden>
   </header>
 
+  <div class="sechead"><h2>Ringkasan keseluruhan</h2><span id="scope"></span></div>
   <section class="stats" id="stats"></section>
 
   <section class="row2">
@@ -228,6 +244,11 @@ dialog::backdrop{background:var(--overlay)}
       <h2>Ikut instrument</h2>
       <table class="breakdown" id="breakdown"></table>
     </div>
+  </section>
+
+  <section class="card panel setups">
+    <h2>Prestasi ikut setup</h2>
+    <table class="breakdown" id="setupTbl"></table>
   </section>
 
   <section class="filters">
@@ -319,6 +340,19 @@ dialog::backdrop{background:var(--overlay)}
   </form>
 </dialog>
 
+<!-- Rename dialog -->
+<dialog id="nameDlg" style="max-width:440px">
+  <form class="dlg" id="nameForm">
+    <div class="dlg-h"><h3>Tukar nama journal</h3><div class="spacer"></div><button type="button" class="x" data-close aria-label="Tutup">×</button></div>
+    <div class="dlg-b" style="display:flex;flex-direction:column;gap:12px">
+      <div class="f"><label for="n-name">Nama journal</label><input id="n-name" maxlength="60" placeholder="cth: Ali Trading Journal"></div>
+      <div class="f"><label for="n-sub">Keterangan (pilihan)</label><input id="n-sub" maxlength="100" placeholder="cth: MGC · MNQ · NY session"></div>
+      <div class="hint">Nama ini dipaparkan di atas, di tab browser dan pada nama fail backup / CSV.</div>
+    </div>
+    <div class="dlg-f"><button type="button" class="btn" data-close>Batal</button><button type="submit" class="btn primary">Simpan nama</button></div>
+  </form>
+</dialog>
+
 <!-- Detail dialog -->
 <dialog id="detailDlg">
   <div class="dlg">
@@ -382,6 +416,8 @@ const money = (n, sign = true) => {
   return (n < 0 ? '−$' : (sign && n > 0 ? '+$' : '$')) + s;
 };
 const cls = n => n > 0 ? 'pos' : n < 0 ? 'neg' : '';
+const pctTxt = r => r == null ? '–' : Math.round(r * 100) + '%';
+const wlBar = S => S.n ? `<div class="wl" title="Win ${pctTxt(S.winRate)} · Loss ${pctTxt(S.lossRate)}${S.be ? ' · BE ' + pctTxt(S.beRate) : ''}"><i class="w" style="width:${S.winRate * 100}%"></i><i class="b" style="width:${S.beRate * 100}%"></i><i class="l" style="width:${S.lossRate * 100}%"></i></div>` : '';
 const fmtDate = d => { if (!d) return ''; const [y, m, day] = d.split('-').map(Number); return new Date(y, m - 1, day).toLocaleDateString('ms-MY', { day: 'numeric', month: 'short', year: 'numeric' }); };
 const weekday = d => { if (!d) return ''; const [y, m, day] = d.split('-').map(Number); return new Date(y, m - 1, day).toLocaleDateString('ms-MY', { weekday: 'long' }); };
 const todayStr = () => { const d = new Date(); return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`; };
@@ -417,6 +453,26 @@ $('#themeBtn').onclick = () => {
 };
 applyTheme();
 
+/* ---------- journal name ---------- */
+const DEFAULT_SUB = 'MGC · MNQ · analisis sebelum & selepas';
+const settings = { name: 'Trading Journal', sub: DEFAULT_SUB };
+try { Object.assign(settings, JSON.parse(localStorage.getItem('akj-settings') || '{}')); } catch {}
+function applyName() {
+  $('#jName').textContent = settings.name;
+  $('#jSub').textContent = settings.sub;
+  document.title = settings.name;
+}
+function saveSettings() { try { localStorage.setItem('akj-settings', JSON.stringify(settings)); } catch {} applyName(); }
+const fileSlug = () => settings.name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '') || 'trading-journal';
+$('#renameBtn').onclick = () => { $('#n-name').value = settings.name; $('#n-sub').value = settings.sub; $('#nameDlg').showModal(); $('#n-name').select(); };
+$('#nameForm').addEventListener('submit', e => {
+  e.preventDefault();
+  settings.name = $('#n-name').value.trim() || 'Trading Journal';
+  settings.sub = $('#n-sub').value.trim();
+  saveSettings(); $('#nameDlg').close(); toast('Nama journal dikemaskini');
+});
+applyName();
+
 /* ---------- state ---------- */
 let trades = [];
 const F = { instr: '', side: '', result: '', from: '', to: '', q: '' };
@@ -444,7 +500,10 @@ function summarize(list) {
   return {
     n: list.length, total, wins: wins.length, losses: losses.length,
     be: list.length - decided,
-    winRate: decided ? wins.length / decided : null,
+    winRate: list.length ? wins.length / list.length : null,
+    lossRate: list.length ? losses.length / list.length : null,
+    beRate: list.length ? (list.length - decided) / list.length : null,
+    grossWin, grossLoss,
     avgWin: wins.length ? wins.reduce((s, t) => s + t.pnl, 0) / wins.length : null,
     avgLoss: losses.length ? losses.reduce((s, t) => s + t.pnl, 0) / losses.length : null,
     pf: grossLoss ? grossWin / grossLoss : (grossWin ? Infinity : null),
@@ -463,14 +522,15 @@ function render() {
 
   const list = filtered();
   const S = summarize(list);
-  const pct = S.winRate == null ? '–' : Math.round(S.winRate * 100) + '%';
   const pf = S.pf == null ? '–' : S.pf === Infinity ? '∞' : S.pf.toFixed(2);
+  const filtering = Object.values(F).some(v => v);
+  $('#scope').textContent = filtering ? `ikut filter · ${list.length} daripada ${trades.length} trade` : `semua ${trades.length} trade`;
   $('#stats').innerHTML = `
-    <div class="card stat"><div class="lbl">Jumlah P/L</div><div class="val num ${cls(S.total)}">${money(S.total)}</div><div class="sub">${S.n} trade</div></div>
-    <div class="card stat"><div class="lbl">Win rate</div><div class="val num">${pct}</div><div class="sub num">${S.wins} success · ${S.losses} fail${S.be ? ' · ' + S.be + ' BE' : ''}</div></div>
-    <div class="card stat"><div class="lbl">Profit factor</div><div class="val num">${pf}</div><div class="sub">untung ÷ rugi</div></div>
-    <div class="card stat"><div class="lbl">Purata success</div><div class="val num pos">${S.avgWin == null ? '–' : money(S.avgWin)}</div><div class="sub num">terbaik ${S.best > 0 ? money(S.best) : '–'}</div></div>
-    <div class="card stat"><div class="lbl">Purata fail</div><div class="val num neg">${S.avgLoss == null ? '–' : money(S.avgLoss)}</div><div class="sub num">terburuk ${S.worst < 0 ? money(S.worst) : '–'}</div></div>
+    <div class="card stat"><div class="lbl">Net P/L</div><div class="val num ${cls(S.total)}">${money(S.total)}</div><div class="sub">${S.n} trade</div></div>
+    <div class="card stat"><div class="lbl">Jumlah profit</div><div class="val num pos">${S.grossWin ? money(S.grossWin) : '$0.00'}</div><div class="sub num">purata ${S.avgWin == null ? '–' : money(S.avgWin)} · terbaik ${S.best > 0 ? money(S.best) : '–'}</div></div>
+    <div class="card stat"><div class="lbl">Jumlah loss</div><div class="val num neg">${S.grossLoss ? money(-S.grossLoss) : '$0.00'}</div><div class="sub num">purata ${S.avgLoss == null ? '–' : money(S.avgLoss)} · terburuk ${S.worst < 0 ? money(S.worst) : '–'}</div></div>
+    <div class="card stat"><div class="lbl">Win / Loss</div><div class="val num"><span class="pos">${pctTxt(S.winRate)}</span> <span style="color:var(--muted);font-weight:400">/</span> <span class="neg">${pctTxt(S.lossRate)}</span></div><div class="sub num">${S.wins} success · ${S.losses} fail${S.be ? ' · ' + S.be + ' BE' : ''}</div>${wlBar(S)}</div>
+    <div class="card stat"><div class="lbl">Profit factor</div><div class="val num">${pf}</div><div class="sub">profit ÷ loss</div></div>
     <div class="card stat"><div class="lbl">Ikut plan</div><div class="val num">${S.n ? Math.round(list.filter(t => t.followedPlan).length / S.n * 100) + '%' : '–'}</div><div class="sub">disiplin</div></div>`;
 
   renderChart(list);
@@ -479,16 +539,24 @@ function render() {
   list.forEach(t => (by[t.instrument] ||= []).push(t));
   const rows = Object.keys(by).sort().map(k => {
     const s = summarize(by[k]);
-    return `<tr><td><span class="badge b-${instrKey(k)}">${esc(k)}</span></td><td class="num">${s.n}</td><td class="num">${s.winRate == null ? '–' : Math.round(s.winRate * 100) + '%'}</td><td class="num ${cls(s.total)}"><b>${money(s.total)}</b></td></tr>`;
+    return `<tr><td><span class="badge b-${instrKey(k)}">${esc(k)}</span></td><td class="num">${s.n}</td><td class="num pos">${pctTxt(s.winRate)}</td><td class="num neg">${pctTxt(s.lossRate)}</td><td class="num ${cls(s.total)}"><b>${money(s.total)}</b></td></tr>`;
   });
   const sides = ['BUY', 'SELL'].map(sd => {
     const l = list.filter(t => t.side === sd); if (!l.length) return '';
     const s = summarize(l);
-    return `<tr><td><span class="badge b-${sd}">${SIDE_LABEL[sd]}</span></td><td class="num">${s.n}</td><td class="num">${s.winRate == null ? '–' : Math.round(s.winRate * 100) + '%'}</td><td class="num ${cls(s.total)}"><b>${money(s.total)}</b></td></tr>`;
+    return `<tr><td><span class="badge b-${sd}">${SIDE_LABEL[sd]}</span></td><td class="num">${s.n}</td><td class="num pos">${pctTxt(s.winRate)}</td><td class="num neg">${pctTxt(s.lossRate)}</td><td class="num ${cls(s.total)}"><b>${money(s.total)}</b></td></tr>`;
   }).join('');
   $('#breakdown').innerHTML = rows.length
-    ? `<tr><th></th><th>Trade</th><th>Win</th><th>P/L</th></tr>${rows.join('')}${sides}`
+    ? `<tr><th></th><th>Trade</th><th>Win</th><th>Loss</th><th>P/L</th></tr>${rows.join('')}${sides}`
     : '<tr><td style="border:none;color:var(--muted)">Tiada data lagi.</td></tr>';
+
+  const bySetup = {};
+  list.forEach(t => (bySetup[t.setup || ''] ||= []).push(t));
+  const setupRows = Object.entries(bySetup).map(([k, l]) => [k, summarize(l)]).sort((a, b) => b[1].total - a[1].total);
+  $('#setupTbl').innerHTML = setupRows.length
+    ? `<tr><th>Setup</th><th>Trade</th><th>Win %</th><th>Loss %</th><th class="bar"></th><th>Jumlah P/L</th></tr>` + setupRows.map(([k, s]) =>
+      `<tr><td class="setup-name" title="${esc(k)}">${k ? esc(k) : '<span style="color:var(--muted)">(tiada setup)</span>'}</td><td class="num">${s.n}</td><td class="num pos">${pctTxt(s.winRate)}</td><td class="num neg">${pctTxt(s.lossRate)}</td><td class="bar">${wlBar(s)}</td><td class="num ${cls(s.total)}"><b>${money(s.total)}</b></td></tr>`).join('')
+    : '<tr><td style="border:none;color:var(--muted)">Isi medan "Setup / Strategi" semasa rekod trade untuk lihat win/loss % setiap setup.</td></tr>';
 
   $('#count').textContent = list.length === trades.length ? `${trades.length} trade` : `${list.length} / ${trades.length} trade`;
 
@@ -840,7 +908,7 @@ $('#exportBtn').onclick = async () => {
   toast('Menyediakan backup…');
   const images = [];
   for (const rec of await idb.all('images')) images.push({ id: rec.id, data: await blobToB64(rec.blob) });
-  download(`trading-journal-backup-${todayStr()}.json`, JSON.stringify({ app: 'akintraday-journal', version: 1, exportedAt: new Date().toISOString(), trades, images }), 'application/json');
+  download(`${fileSlug()}-backup-${todayStr()}.json`, JSON.stringify({ app: 'akintraday-journal', version: 1, exportedAt: new Date().toISOString(), settings: { name: settings.name, sub: settings.sub }, trades, images }), 'application/json');
 };
 $('#importBtn').onclick = () => $('#importFile').click();
 $('#importFile').addEventListener('change', async e => {
@@ -852,6 +920,7 @@ $('#importFile').addEventListener('change', async e => {
     if (!confirm(`Restore ${data.trades.length} trade dan ${data.images?.length || 0} gambar? Trade dengan ID sama akan ditulis semula; trade lain dikekalkan.`)) return;
     for (const im of data.images || []) { dropUrl(im.id); await idb.put('images', { id: im.id, blob: b64ToBlob(im.data) }); }
     for (const t of data.trades) await idb.put('trades', t);
+    if (data.settings?.name) { settings.name = String(data.settings.name).slice(0, 60); settings.sub = String(data.settings.sub ?? '').slice(0, 100); saveSettings(); }
     await load();
     toast(`${data.trades.length} trade di-restore`);
   } catch (ex) { toast('Restore gagal: ' + ex.message); }
@@ -862,7 +931,7 @@ $('#csvBtn').onclick = () => {
   const cols = ['date', 'time', 'instrument', 'side', 'qty', 'entry', 'exit', 'sl', 'tp', 'fees', 'pnl', 'result', 'setup', 'followedPlan', 'beforeText', 'afterText', 'lesson'];
   const cell = v => { const s = v == null ? '' : String(v); return /[",\n\r]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s; };
   const rows = [cols.join(','), ...[...list].reverse().map(t => cols.map(c => cell(c === 'result' ? RESULT_LABEL[t.result] : t[c])).join(','))];
-  download(`trading-journal-${todayStr()}.csv`, '﻿' + rows.join('\r\n'), 'text/csv');
+  download(`${fileSlug()}-${todayStr()}.csv`, '﻿' + rows.join('\r\n'), 'text/csv');
 };
 
 /* ---------- storage persistence ---------- */
