@@ -19,6 +19,7 @@ const { chromium } = require('playwright');
   }
 
   // fail tambahan: imej overall (peta baharu) & artwork peta untuk cetakan
+  await page.setViewportSize({ width: 2200, height: 1400 });
   await page.addStyleTag({ content: '.export{position:static!important;left:auto}.page{display:none}body{background:transparent}' });
   await page.waitForTimeout(200);
   await (await page.$('#overall-export')).screenshot({ path: out('overall-baju-peta-baharu.png') });

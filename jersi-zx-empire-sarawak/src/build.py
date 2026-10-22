@@ -203,7 +203,7 @@ def page_short():
         (1, 238, 318), (2, 128, 400), (3, 52, 520), (4, 492, 462), (5, 452, 612), (6, 555, 772)])
     feats = [
         ('Kolar bulat rib', 'Rib hijau neon, kemas & selesa.'),
-        ('Logo depan penuh', 'Emblem ZX Empire Owner + bendera Sarawak & Malaysia.'),
+        ('Logo depan penuh', 'Logo baharu ZX Empire Owner – 3 Ninja ZX + bendera.'),
         ('Lengan pendek', 'Jalur neon di hujung lengan + corak calar.'),
         ('Peta Sarawak baharu', 'Cutout peta Sarawak + nama daerah.'),
         ('Skyline Kuching', 'Jambatan Darul Hana + ZX25R | 4R | 6R | 10R.'),
@@ -246,7 +246,7 @@ def page_long():
         (1, 990, 318), (2, 878, 400), (3, 812, 560), (4, 1252, 466), (5, 1212, 612), (6, 792, 768)])
     feats = [
         ('Kolar bulat rib', 'Rib hijau neon, kemas & selesa.'),
-        ('Logo depan penuh', 'Emblem ZX Empire Owner + bendera Sarawak & Malaysia.'),
+        ('Logo depan penuh', 'Logo baharu ZX Empire Owner – 3 Ninja ZX + bendera.'),
         ('Lengan panjang', 'Corak calar & jalur neon sepanjang lengan.'),
         ('Peta Sarawak baharu', 'Cutout peta Sarawak + nama daerah.'),
         ('Skyline & model ZX', 'Jambatan Darul Hana + ZX25R | 4R | 6R | 10R.'),
@@ -370,10 +370,8 @@ def body_art(back):
     """Rekaan dalam kepingan badan (imej dipotong dari mockup + peta vektor)."""
     if not back:
         # emblem utama (bahagian atas tengah imej asal)
-        k = 31 / 320  # emblem asal ~320px diameter, pusat (765,173) -> 31 cm di dada
         return (chevrons() + slashes()
-                + f'<image href="{IMG}" x="{-765 * k:.2f}" y="{27 - 173 * k:.2f}" width="{IMG_W * k:.2f}" '
-                  f'height="{IMG_H * k:.2f}" clip-path="url(#emblemClip)" preserveAspectRatio="none"/>')
+                + '<image href="assets/logo-baru.webp" x="-15.5" y="11" width="31" height="31"/>')
     # belakang: teks "THE SPIRIT OF SCREAMING" + peta + skyline
     u = 34 / MAP_W
     mp = map_svg('pat', width=None).replace('<svg ', f'<svg x="{-17 - PAD * u:.2f}" y="{24 - PAD * u:.2f}" '
@@ -447,7 +445,6 @@ def page_pattern():
       <pattern id="jersey" width="200" height="200" patternUnits="userSpaceOnUse" x="-100" y="0">
         <rect width="200" height="200" fill="url(#jg)"/><rect width="200" height="200" fill="url(#hex)"/>
       </pattern>
-      <clipPath id="emblemClip"><circle cx="0" cy="27" r="15.5"/></clipPath>
     </defs>
   </svg>
   <div class="panel pband"><h3><span class="num">A</span> LENGAN PENDEK <em>SHORT SLEEVE · SAIZ M</em></h3>{set_(False)}</div>

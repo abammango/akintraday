@@ -132,6 +132,7 @@ h3 em{font:700 15px/1 'Barlow Condensed';color:var(--neon);font-style:normal;let
 
 .export{position:absolute;left:-99999px;top:0}
 #map-export{width:2176px}
+#overall-export{width:1536px}
 
 @media print{
   @page{size:1080px 1350px;margin:0}

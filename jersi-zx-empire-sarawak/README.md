@@ -2,6 +2,7 @@
 
 Peta Sarawak di belakang baju diganti dengan **cutout peta Sarawak sebenar** (outline Natural Earth) dan
 **17 nama bahagian / daerah**. Konsep dan warna asal dikekalkan: isi kelabu grunge dengan outline hijau neon.
+Semua logo lama (logo besar atas + logo depan baju) diganti dengan logo baharu `assets/logo-baru.webp`.
 
 ## Output (`output/`)
 | Fail | Isi |
@@ -21,7 +22,7 @@ Peta Sarawak di belakang baju diganti dengan **cutout peta Sarawak sebenar** (ou
 - Carta saiz: `CHEST`, `LENGTH`, `SLEEVE_LONG` dalam `src/build.py`.
 
 ```sh
-python3 src/prepare.py                      # sekali sahaja: padam peta lama dari mockup asal
+python3 src/prepare.py                      # padam peta & logo lama, letak logo baharu
 python3 src/build.py                        # jana katalog.html + assets/peta-sarawak.svg
 NODE_PATH=$(npm root -g) node src/render.js # render PNG + PDF ke output/
 ```
