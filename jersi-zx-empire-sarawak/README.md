@@ -17,7 +17,6 @@ Peta Sarawak di belakang baju diganti dengan **cutout peta Sarawak sebenar** (ou
 `assets/peta-sarawak.svg` ialah versi vektor peta (font tertanam) untuk cetakan sublimasi.
 
 ## Edit & jana semula
-- No. WhatsApp / nama admin: ubah `CONTACT` dalam `src/build.py`.
 - Nama daerah & kedudukan label: senarai `PLACES` dalam `src/build.py`.
 - Carta saiz: `CHEST`, `LENGTH`, `SLEEVE_LONG` dalam `src/build.py`.
 

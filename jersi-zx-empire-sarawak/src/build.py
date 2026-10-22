@@ -5,7 +5,6 @@ Jalankan dari folder jersi-zx-empire-sarawak:  python3 src/build.py
 """
 import base64
 import json
-import math
 import os
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -13,12 +12,6 @@ A = lambda *p: os.path.join(ROOT, 'assets', *p)
 
 NEON = '#8fe31c'
 NEON_DK = '#5d9a0c'
-
-# Ganti maklumat ini untuk end card
-CONTACT = {
-    'nama': 'ADMIN ZX EMPIRE OWNER SARAWAK',
-    'whatsapp': '01X-XXX XXXX',
-}
 
 # --------------------------------------------------------------------------
 # Peta Sarawak
@@ -42,25 +35,25 @@ def land_path():
     return ''.join(parts)
 
 
-# (nama, lon, lat, anchor, dx, dy, saiz, jenis)  jenis: city / town / park
+# (nama, lon, lat, anchor, dx, dy, saiz, jenis)  jenis: town / park
 PLACES = [
-    ('KUCHING',      110.345, 1.553, 'end',    -16,  34, 34, 'capital'),
-    ('SANTUBONG',    110.330, 1.720, 'end',    -14,  -6, 20, 'town'),
-    ('SAMARAHAN',    110.490, 1.460, 'start',   14,   2, 20, 'town'),
-    ('SERIAN',       110.570, 1.170, 'start',   14,  10, 22, 'town'),
-    ('BETONG',       111.530, 1.410, 'start',   14,  -4, 22, 'town'),
+    ('KUCHING',      110.345, 1.553, 'end',    -14,  26, 24, 'town'),
+    ('SANTUBONG',    110.330, 1.720, 'end',    -14,  -6, 24, 'town'),
+    ('SAMARAHAN',    110.490, 1.460, 'start',   12, -12, 24, 'town'),
+    ('SERIAN',       110.570, 1.170, 'start',   14,  10, 24, 'town'),
+    ('BETONG',       111.530, 1.410, 'start',   14,   6, 24, 'town'),
     ('SRI AMAN',     111.460, 1.240, 'start',   14,  20, 24, 'town'),
     ('SARIKEI',      111.520, 2.130, 'end',    -14,   8, 24, 'town'),
-    ('SIBU',         111.820, 2.300, 'start',   14,   4, 28, 'city'),
+    ('SIBU',         111.820, 2.300, 'start',   14,   4, 24, 'town'),
     ('MUKAH',        112.090, 2.900, 'end',    -14,  -2, 24, 'town'),
-    ('KAPIT',        112.940, 2.020, 'start',   14,   8, 26, 'town'),
-    ('BINTULU',      113.030, 3.170, 'end',    -14,  -6, 28, 'city'),
+    ('KAPIT',        112.940, 2.020, 'start',   14,   8, 24, 'town'),
+    ('BINTULU',      113.030, 3.170, 'end',    -14,  -6, 24, 'town'),
     ('BELAGA',       113.780, 2.700, 'start',   14,   8, 24, 'town'),
-    ('NIAH',         113.780, 3.810, 'end',    -14,   2, 20, 'park'),
-    ('MIRI',         113.990, 4.400, 'end',    -16,  -2, 30, 'city'),
-    ('GUNUNG MULU',  114.920, 4.050, 'middle',   0,  36, 20, 'park'),
-    ('LIMBANG',      115.000, 4.750, 'end',    -14, -10, 22, 'town'),
-    ('LAWAS',        115.410, 4.850, 'start',   -6, -24, 22, 'town'),
+    ('NIAH',         113.780, 3.810, 'end',    -14,   2, 24, 'park'),
+    ('MIRI',         113.990, 4.400, 'end',    -16,  -2, 24, 'town'),
+    ('GUNUNG MULU',  114.920, 4.050, 'middle',   0,  36, 24, 'park'),
+    ('LIMBANG',      115.000, 4.750, 'end',    -14, -10, 24, 'town'),
+    ('LAWAS',        115.410, 4.850, 'start',   -6, -24, 24, 'town'),
 ]
 
 
@@ -112,29 +105,16 @@ def map_svg(uid, labels=True, embed_fonts=False, width=None, extra_style=''):
                    'stroke="#070707" stroke-linejoin="round" paint-order="stroke">')
         for name, lon, lat, anchor, dx, dy, size, kind in PLACES:
             x, y = proj(lon, lat)
-            if kind == 'capital':
-                out.append(star(x, y, 15))
-            elif kind == 'park':
+            if kind == 'park':
                 out.append(f'<path d="M{x:.1f},{y - 10:.1f}L{x + 10:.1f},{y + 8:.1f}L{x - 10:.1f},{y + 8:.1f}Z" '
                            f'fill="{NEON}" stroke="#070707" stroke-width="3"/>')
             else:
-                r = 9 if kind == 'city' else 7
-                out.append(f'<circle cx="{x:.1f}" cy="{y:.1f}" r="{r}" fill="{NEON}" stroke="#070707" stroke-width="3.5"/>')
-            col = NEON if kind == 'capital' else '#ffffff'
+                out.append(f'<circle cx="{x:.1f}" cy="{y:.1f}" r="7" fill="{NEON}" stroke="#070707" stroke-width="3.5"/>')
             out.append(f'<text x="{x + dx:.1f}" y="{y + dy:.1f}" text-anchor="{anchor}" font-size="{size}" '
-                       f'stroke-width="{size * 0.28:.1f}" fill="{col}" letter-spacing="1">{name}</text>')
+                       f'stroke-width="{size * 0.28:.1f}" letter-spacing="1">{name}</text>')
         out.append('</g>')
     out.append('</svg>')
     return ''.join(out)
-
-
-def star(cx, cy, r):
-    pts = []
-    for i in range(10):
-        rr = r if i % 2 == 0 else r * 0.45
-        a = -math.pi / 2 + i * math.pi / 5
-        pts.append(f'{cx + rr * math.cos(a):.1f},{cy + rr * math.sin(a):.1f}')
-    return f'<polygon points="{" ".join(pts)}" fill="{NEON}" stroke="#070707" stroke-width="3.5"/>'
 
 
 # --------------------------------------------------------------------------
@@ -508,8 +488,6 @@ def page_overall():
       <div><span>3</span><b>PM / WHATSAPP</b>Hantar nama, saiz &amp; kuantiti</div>
     </div>
     <div class="contact">
-      <div class="wa"><svg viewBox="0 0 24 24" width="34" height="34"><path fill="{NEON}" d="M12 2a10 10 0 0 0-8.6 15.1L2 22l5-1.3A10 10 0 1 0 12 2zm0 18.2a8.2 8.2 0 0 1-4.2-1.1l-.3-.2-3 .8.8-2.9-.2-.3A8.2 8.2 0 1 1 12 20.2zm4.5-6.1c-.2-.1-1.5-.7-1.7-.8s-.4-.1-.6.1-.7.8-.8 1-.3.2-.5.1a6.7 6.7 0 0 1-3.3-2.9c-.3-.4.3-.4.7-1.3a.5.5 0 0 0 0-.4l-.8-1.8c-.2-.5-.4-.4-.6-.4h-.5a1 1 0 0 0-.7.3 3 3 0 0 0-.9 2.2 5.1 5.1 0 0 0 1.1 2.7 11.6 11.6 0 0 0 4.4 3.9c1.6.7 2.3.8 3.1.6a2.7 2.7 0 0 0 1.7-1.2 2.2 2.2 0 0 0 .2-1.2c-.1-.1-.3-.2-.5-.3z"/></svg>
-        <div><small>HUBUNGI</small><b>{CONTACT['nama']}</b><span>WhatsApp: {CONTACT['whatsapp']}</span></div></div>
       <div class="slogan brush">RIDE TOGETHER<br><em>STAY TOGETHER</em></div>
     </div>
   </div>

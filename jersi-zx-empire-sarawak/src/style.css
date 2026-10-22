@@ -126,12 +126,8 @@ h3 em{font:700 15px/1 'Barlow Condensed';color:var(--neon);font-style:normal;let
 .steps span{position:absolute;left:14px;top:50%;margin-top:-20px;width:40px;height:40px;border-radius:50%;background:var(--neon);color:#000;
   font:400 20px/40px 'Russo One';text-align:center}
 .steps b{display:block;font:400 17px/1.2 'Russo One';color:#fff;margin-bottom:3px}
-.contact{display:flex;justify-content:space-between;align-items:center;margin-top:20px;position:relative;z-index:1}
-.wa{display:flex;gap:14px;align-items:center}
-.wa small{display:block;font:700 13px/1 'Barlow Condensed';letter-spacing:4px;color:var(--neon)}
-.wa b{display:block;font:400 20px/1.2 'Russo One';color:#fff;margin-top:4px}
-.wa span{display:block;font:700 22px/1.2 'Barlow Condensed';color:#fff}
-.slogan{font-size:30px;line-height:1.05;text-align:right;color:#fff}
+.contact{display:flex;justify-content:center;align-items:center;margin-top:20px;position:relative;z-index:1}
+.slogan{font-size:30px;line-height:1.05;text-align:center;color:#fff}
 .slogan em{font-style:normal;color:var(--neon);font-size:40px}
 
 .export{position:absolute;left:-99999px;top:0}
