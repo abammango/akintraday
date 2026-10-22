@@ -17,7 +17,7 @@ A = lambda *p: os.path.join(ROOT, 'assets', *p)
 subprocess.run([sys.executable, os.path.join(ROOT, 'src', 'erase.py'), A('asal-mockup.webp'), A('base.png')], check=True)
 # logo lama: (pusat x, pusat y, jejari x, jejari y) kawasan dipadam, diameter logo baharu (px imej asal),
 # dan sama ada logo dicetak pada baju (ikut lengkung badan + cahaya kain) atau logo paparan biasa
-LOGOS = [((766, 172, 160, 172), 345, False),   # logo besar atas
+LOGOS = [((766, 173, 172, 176), 242, False),   # logo besar atas (30% lebih kecil dari asal)
          ((240, 493, 118, 108), 214, True),    # depan lengan pendek
          ((990, 495, 112, 108), 206, True)]    # depan lengan panjang
 
@@ -26,9 +26,19 @@ mask = np.zeros(bgr.shape[:2], np.uint8)
 for (cx, cy, rx, ry), _, _ in LOGOS:
     cv2.ellipse(mask, (cx, cy), (rx, ry), 0, 0, 360, 255, -1)
 bgr = cv2.inpaint(bgr, mask, 5, cv2.INPAINT_TELEA)
-# kawasan yang diinpaint jadi kelabu licin; gelapkan supaya serasi dengan fabrik hitam
-m = cv2.GaussianBlur(mask, (0, 0), 6).astype(np.float32)[..., None] / 255.0
-bgr = (bgr * (1 - m) + bgr * 0.35 * m).astype(np.uint8)
+# kawasan yang diinpaint jadi kelabu licin: atas baju digelapkan supaya serasi dengan fabrik hitam,
+# logo paparan dapat bayang gelap lembut (radial) yang menutup sisa kawasan logo lama
+dark = np.zeros(bgr.shape[:2], np.float32)
+yy, xx = np.mgrid[0:bgr.shape[0], 0:bgr.shape[1]]
+for (cx, cy, rx, ry), _, shirt in LOGOS:
+    if shirt:
+        one = np.zeros(bgr.shape[:2], np.uint8)
+        cv2.ellipse(one, (cx, cy), (rx, ry), 0, 0, 360, 255, -1)
+        dark = np.maximum(dark, cv2.GaussianBlur(one, (0, 0), 6).astype(np.float32) / 255.0 * 0.65)
+    else:
+        r = np.hypot((xx - cx) / (rx * 1.25), (yy - cy) / (ry * 1.25))
+        dark = np.maximum(dark, np.clip(1.15 - r, 0, 1) ** 0.8 * 0.92)
+bgr = (bgr * (1 - dark[..., None])).astype(np.uint8)
 im = Image.fromarray(cv2.cvtColor(bgr, cv2.COLOR_BGR2RGB))
 im2 = im.resize((im.width * 2, im.height * 2), Image.LANCZOS).filter(ImageFilter.UnsharpMask(radius=2, percent=60, threshold=2))
 im2 = im2.convert('RGBA')
